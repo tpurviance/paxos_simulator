@@ -1,0 +1,128 @@
+<html>
+	<head>
+		<style>
+		div { 
+			text-align:center;
+		}
+		</style>
+		<script type="application/javascript">
+			function CanvasMgr(canvas, w, h){
+				this.canvas = canvas;
+				//this.canvas.width = ;
+				//this.canvas.height = ;
+				this.width = canvas.getBoundingClientRect().width;
+				this.height = canvas.getBoundingClientRect().height;
+				this.context2d = this.canvas.getContext("2d");
+				this.drawables = new Array();
+				this.backgroundColor = "rgb(255,255,255)";
+			}
+			
+			function Drawable(obj, depth) {
+				this.drawable = obj;
+				this.depth = depth;
+				
+				this.draw = function(context) {
+					this.drawable.draw(context);
+				}
+			}
+			
+			function Rectangle(x,y,width,height,color,fill) {
+				this.x = x;
+				this.y = y;
+				this.width = width;
+				this.height = height;
+				this.color = color;
+				this.fill = fill;
+			}
+			
+			Rectangle.prototype.draw = function (context) {
+				if (this.fill) {
+					this.fillDraw(context);
+				} else {
+					this.strokeDraw(context);
+				}
+			}
+			
+			Rectangle.prototype.strokeDraw = function (context) {
+				var f = Math.floor;
+				context.fillStyle = this.color;
+				context.strokeRect(f(this.x), f(this.y), f(this.width), f(this.height));
+			}
+			
+			Rectangle.prototype.fillDraw = function (context) {
+				var f = Math.floor;
+				context.fillStyle = this.color;
+				context.fillRect(f(this.x), f(this.y), f(this.width), f(this.height));
+			}
+			
+			Rectangle.prototype.move = function(dx, dy) {
+				this.x += dx;
+				this.y += dy;
+			}
+			
+			
+			function addDrawable(drawable) {
+				cm.drawables.push(drawable)
+				cm.drawables.sort(function(a,b){return b.depth-a.depth});
+			}
+			
+			function addDrawable(obj, depth) {
+				var drawable = new Drawable(obj, depth);
+				cm.drawables.push(drawable)
+				//var time = new Date().getTime();
+				cm.drawables.sort(function(a,b){return a.depth-b.depth});
+				//time = new Date().getTime() - time;
+				//console.log("" + rects + " - " + time);
+				draw();
+			}
+			
+			
+			var initialize = function() {
+				cm = new CanvasMgr(document.getElementById('canvas'), window.screen.availWidth, window.screen.availHeight);
+				
+				addDrawable(new Rectangle(50, 50, 50, 80, "rgb(0,256,0)", true), 1);
+				addDrawable(new Rectangle(10, 10, 55, 50, "rgb(200,0,0)", true), 2);
+				addDrawable(new Rectangle(30, 30, 55, 50, "rgb(0,0,200)", true), 3);
+				addDrawable(new Rectangle(0, 0, cm.width, cm.height, "rgb(0,0,0)" , false), 99);
+				
+				animateLoop();
+			}
+			
+			var draw = function() {
+				var ctx = cm.context2d;
+				
+				ctx.fillStyle = cm.backgroundColor;
+				ctx.fillRect(0, 0, cm.width, cm.height);
+				
+				for (var i = 0; i < cm.drawables.length; i++) {
+					cm.drawables[i].draw(ctx);
+				}
+			}
+			
+			var animateLoop = function() {
+				canvasClick();
+				setTimeout(animateLoop,20);
+			}
+			
+			var rects = 10;
+			
+			var canvasClick = function() {
+				var r = Math.random;
+				var f = Math.floor;
+				var rect = new Rectangle(r()*cm.width, r()*cm.height, r()*80, r()*60, "rgb("+f(r()*257)+","+f(r()*257)+","+f(r()*257)+")",true);
+				addDrawable(rect, rects);
+				rects++;
+			}
+			
+			var keyPress = function() {
+				console.log(String.fromCharCode(event.keyCode));
+			}
+			
+		</script>
+	</head>
+	<body onload="initialize();" onkeypress="keyPress();">
+		<div>
+			<canvas id="canvas" width="1280" height="720" onclick="canvasClick();"></canvas>
+		</div>
+	</body>
+</html>
