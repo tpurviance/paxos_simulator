@@ -20,7 +20,19 @@
 				return Math.floor(Math.random()*value);
 			}
 
-			function CanvasMgr(canvas, w, h, fps){
+			var animateLoop = function() {
+				var timestart = Date.now();
+				//canvasClick();
+				msgMgr.updateMsgs();
+				cm.drawCanvas();
+				var timeleft = this.waitTime - (Date.now() - timestart);
+				timeleft = Math.min(5,timeleft);
+				cm.frameTime = timestart - cm.lastFrame ;
+				cm.lastFrame = timestart;
+				setTimeout(animateLoop, timeleft);
+			};
+			
+			var CanvasMgr = function(canvas, w, h, fps){
 				this.canvas = canvas;
 				canvas.onclick=this.canvasClick;
 				canvas.onkeypress = this.keyPress;
@@ -34,18 +46,6 @@
 				this.lastFrame = Date.now();
 				this.frameTime = 0;
 			}
-
-			var animateLoop = function() {
-				var timestart = Date.now();
-				//canvasClick();
-				msgMgr.updateMsgs();
-				cm.drawCanvas();
-				var timeleft = this.waitTime - (Date.now() - timestart);
-				timeleft = Math.min(5,timeleft);
-				cm.frameTime = timestart - cm.lastFrame ;
-				cm.lastFrame = timestart;
-				setTimeout(animateLoop, timeleft);
-			};
 			
 			// var rects = 10;
 
@@ -63,12 +63,12 @@
 			};
 
 			CanvasMgr.prototype.drawCanvas = function() {
-				var ctx = this.context2d
+				var ctx = this.context2d;
 				
 				ctx.fillStyle = this.backgroundColor;
 				ctx.fillRect(0, 0, this.width, this.height);
 
-				ctx.fillStyle = "rgb(0,0,0)"
+				ctx.fillStyle = "rgb(0,0,0)";
 				ctx.font="30px Arial";
 				ctx.fillText("messages:" + msgMgr.movingMsgs.length , 10, 30);
 				ctx.fillText("fps:" + Math.floor(1000.0 / cm.frameTime), 10, 60);
@@ -119,7 +119,7 @@
 			* Rectangle code
 			*********************************/
 
-			function Rectangle(x,y,width,height,color,fill) {
+			var Rectangle = function(x,y,width,height,color,fill) {
 				this.x = x;
 				this.y = y;
 				this.width = width;
@@ -183,7 +183,7 @@
 			* Node code
 			*********************************/
 
-			function NodeMgr() {
+			var NodeMgr = function() {
 				this.nodes = new Array();
 			}
 
@@ -193,7 +193,7 @@
 				}
 			}
 
-			function Node(x, y, type, ip) {
+			var Node = function(x, y, type, ip) {
 				this.x = x;
 				this.y = y;
 				this.type = type;
@@ -206,6 +206,9 @@
 				this.drawable.draw(context);
 			}
 
+			// OMG taylor
+			// i before e except after c
+			// dumbass
 			Node.prototype.recieveMessage = function(message) {
 
 				do {
@@ -222,7 +225,7 @@
 				message.send();
 			}
 
-			function MessageMgr() {
+			var MessageMgr = function() {
 				this.movingMsgs = new Array();
 			}
 
@@ -245,7 +248,7 @@
 					this.movingMsgs[i].draw(context);
 				}
 			}
-			function Message(from, to, type, content) {
+			var Message = function(from, to, type, content) {
 				this.from = from;
 				this.to = to;
 				this.type = type;
@@ -291,7 +294,7 @@
 				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
 				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
 
-				n1.sendMessage(n2, "asdf", "fdsa")
+				n1.sendMessage(n2, "asdf", "fdsa");
 				
 
 				animateLoop();
