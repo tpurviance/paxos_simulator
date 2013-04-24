@@ -8,18 +8,15 @@
 			border:2px solid black;
 		}
 		</style>
+		<script type="application/javascript" src="UIMgr.js"></script>
+		<script type="application/javascript" src="CanvasMgr.js"></script>
+		<script type="application/javascript" src="Rectangle.js"></script>
+		<script type="application/javascript" src="NodeMgr.js"></script>
+		<script type="application/javascript" src="Node.js"></script>
+		<script type="application/javascript" src="MessageMgr.js"></script>
+		<script type="application/javascript" src="Message.js"></script>
+		<script type="application/javascript" src="Functions.js"></script>
 		<script type="application/javascript">
-
-			/*********************************
-			* CanvasMgr code
-			*********************************/
-			var sign = function(value) {
-				return (value > 0 ? 1 : (value < 0 ? -1 : 0));
-			}
-			var randIntUnder = function(value) {
-				return Math.floor(Math.random()*value);
-			}
-
 			var animateLoop = function() {
 				var timestart = Date.now();
 				//canvasClick();
@@ -32,251 +29,6 @@
 				setTimeout(animateLoop, timeleft);
 			};
 			
-			var CanvasMgr = function(canvas, w, h, fps){
-				this.canvas = canvas;
-				canvas.onclick=this.canvasClick;
-				canvas.onkeypress = this.keyPress;
-				this.waitTime = Math.floor(1000/fps);
-				//this.canvas.width = ;
-				//this.canvas.height = ;
-				this.width = canvas.getBoundingClientRect().width;
-				this.height = canvas.getBoundingClientRect().height;
-				this.context2d = this.canvas.getContext("2d");
-				this.backgroundColor = "rgb(255,255,255)";
-				this.lastFrame = Date.now();
-				this.frameTime = 0;
-			}
-			
-			// var rects = 10;
-
-			CanvasMgr.prototype.canvasClick = function() {
-
-				// var r = Math.random;
-				// var f = Math.floor;
-				// var rect = new Rectangle(event.offsetX, event.offsetY, 10+r()*70, 10+r()*50, "rgb("+f(r()*257)+","+f(r()*257)+","+f(r()*257)+")",true);
-				// cm.addDrawable(rect, rects);
-				// rects++;
-			};
-
-			CanvasMgr.prototype.keyPress = function() {
-				console.log(String.fromCharCode(event.keyCode));
-			};
-
-			CanvasMgr.prototype.drawCanvas = function() {
-				var ctx = this.context2d;
-				
-				ctx.fillStyle = this.backgroundColor;
-				ctx.fillRect(0, 0, this.width, this.height);
-
-				ctx.fillStyle = "rgb(0,0,0)";
-				ctx.font="30px Arial";
-				ctx.fillText("messages:" + msgMgr.movingMsgs.length , 10, 30);
-				ctx.fillText("fps:" + Math.floor(1000.0 / cm.frameTime), 10, 60);
-				
-				nodeMgr.drawNodes(ctx);
-				msgMgr.drawMsgs(ctx);
-				// for (var i = 0; i < this.drawables.length; i++) {
-				// 	this.drawables[i].draw(ctx);
-				// }
-			};
-
-			CanvasMgr.prototype.stepAnimations = function(time) {
-				for (var i = 0; i < this.animations.length; i++) {
-					this.animations[i].step(time);
-				}
-			};
-
-			// CanvasMgr.prototype.addDrawable = function(drawable){
-			// 	this.drawables.push(drawable);
-			// 	this.drawables.sort(function(a,b){return b.depth-a.depth});
-			// };
-			
-			// CanvasMgr.prototype.addDrawable = function(obj, depth) {
-			// 	var drawable = new Drawable(obj, depth);
-			// 	this.drawables.push(drawable);
-			// 	//var time = new Date().getTime();
-			// 	this.drawables.sort(function(a,b){return a.depth-b.depth});
-			// 	//time = new Date().getTime() - time;
-			// 	//console.log("" + rects + " - " + time);
-			// 	//this.draw();
-			// };
-
-			/*********************************
-			* Drawable code
-			*********************************/
-			
-			// function Drawable(obj, depth) {
-			// 	this.drawable = obj;
-			// 	this.depth = depth;
-			// }
-			
-			// Drawable.prototype.draw = function(context) {
-			// 		this.drawable.draw(context);
-			// }
-			
-
-			/*********************************
-			* Rectangle code
-			*********************************/
-
-			var Rectangle = function(x,y,width,height,color,fill) {
-				this.x = x;
-				this.y = y;
-				this.width = width;
-				this.height = height;
-				this.color = color;
-				this.fill = fill;
-			}
-			
-			Rectangle.prototype.draw = function (context) {
-				if (this.fill) {
-					this.fillDraw(context);
-				} else {
-					this.strokeDraw(context);
-				}
-			}
-			
-			Rectangle.prototype.strokeDraw = function (context) {
-				var f = Math.floor;
-				context.fillStyle = this.color;
-				context.strokeRect(f(this.x), f(this.y), f(this.width), f(this.height));
-			}
-			
-			Rectangle.prototype.fillDraw = function (context) {
-				var f = Math.floor;
-				context.fillStyle = this.color;
-				context.fillRect(f(this.x), f(this.y), f(this.width), f(this.height));
-			}
-			
-			Rectangle.prototype.move = function(dx, dy) {
-				this.x += dx;
-				this.y += dy;
-			}
-			
-			/*********************************
-			* Animation code - probably just dumb
-			*********************************/
-
-			// function Animation(animatee, timeToAnimate, funcToCallOnComplete) {
-			// 	this.animatee = animatee;
-			// 	this.timeToAnimate = timeToAnimate; // in ms
-			// 	this.funcToCallOnComplete = funcToCallOnComplete;
-			// 	this.animateProps = new Array();
-			// }
-
-			// Animation.prototype.addAnimateProperty = function(property, valStart, valEnd) {
-			// 	this.animateProps.push([property, valStart, valEnd]);
-			// }
-
-			// Animation.prototype.startAnimation = function() {
-			// 	this.startTime = Date.now();
-			// }
-			
-			// Animation.prototype.step = function (time) {
-			// 	var percent = Math.max(time - this.startTime / this.timeToAnimate, 1.0);
-			// 	for(var i = 0; i < this.animateProps.length; i++){
-
-			// 	}
-			// }
-
-			/*********************************
-			* Node code
-			*********************************/
-
-			var NodeMgr = function() {
-				this.nodes = new Array();
-			}
-
-			NodeMgr.prototype.drawNodes = function (context) {
-				for(var i = 0; i < this.nodes.length; i++) {
-					this.nodes[i].draw(context);
-				}
-			}
-
-			var Node = function(x, y, type, ip) {
-				this.x = x;
-				this.y = y;
-				this.type = type;
-				this.ip = ip;
-				this.drawable = new Rectangle(x-50, y-50, 100, 100, "rgb(0,0,128)", true);
-				nodeMgr.nodes.push(this);
-			}
-			
-			Node.prototype.draw = function (context) {
-				this.drawable.draw(context);
-			}
-
-			// OMG taylor
-			// i before e except after c
-			// dumbass
-			Node.prototype.recieveMessage = function(message) {
-
-				do {
-					var randRecip1 = nodeMgr.nodes[randIntUnder(nodeMgr.nodes.length)];
-					var randRecip2 = nodeMgr.nodes[randIntUnder(nodeMgr.nodes.length)];
-				} while (randRecip1 == this || randRecip2 == this || randRecip1 == randRecip2);
-
-				this.sendMessage(randRecip1, message.type, message.content);
-				this.sendMessage(randRecip2, message.type, message.content);
-			}
-
-			Node.prototype.sendMessage = function(to, type, content) {
-				var message = new Message(this, to, type, content);
-				message.send();
-			}
-
-			var MessageMgr = function() {
-				this.movingMsgs = new Array();
-			}
-
-			MessageMgr.prototype.updateMsgs = function() {
-				var doneMsgs = new Array();
-				for(var i = 0; i < this.movingMsgs.length; i++) {
-					var done = this.movingMsgs[i].update();
-					if (done)
-						doneMsgs.push([i,this.movingMsgs[i]]);
-				}
-				while (doneMsgs.length) {
-					var indexAndMess = doneMsgs.pop();
-					this.movingMsgs.splice(indexAndMess[0],1);
-					indexAndMess[1].to.recieveMessage(indexAndMess[1]);
-				}
-			}
-
-			MessageMgr.prototype.drawMsgs = function(context) {
-				for(var i = 0; i < this.movingMsgs.length; i++) {
-					this.movingMsgs[i].draw(context);
-				}
-			}
-			var Message = function(from, to, type, content) {
-				this.from = from;
-				this.to = to;
-				this.type = type;
-				this.content = content;
-				this.drawable = new Rectangle(from.x, from.y, 20, 20, "rgb(200,0,0)", true);
-			}
-
-			Message.prototype.send = function() {
-				msgMgr.movingMsgs.push(this);
-			}
-
-			Message.prototype.draw = function(context) {
-				this.drawable.draw(context);
-			}
-
-			Message.prototype.update = function() {
-				var dx = sign(this.to.x - this.drawable.x);
-				var dy = sign(this.to.y - this.drawable.y);
-
-				this.drawable.move(dx,dy);
-
-				if (dx == 0 && dy == 0) 
-					return true;
-				else
-					return false;
-			}
-
-
 			window.onload = function() {
 				cm = new CanvasMgr(document.getElementById('canvas'), window.screen.availWidth, window.screen.availHeight, 1000);
 				msgMgr = new MessageMgr();
@@ -304,6 +56,7 @@
 	</head>
 	<body>
 		<div>
+			<div id="uihook"></div>
 			<canvas id="canvas" width="1600" height="900"></canvas>
 		</div>
 	</body>
