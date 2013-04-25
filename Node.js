@@ -29,6 +29,23 @@ Node.prototype.setLeader = function() {
 // 
 Node.prototype.recieveMessage = function(message) {
 
+	switch (message.type) {
+		case Message.Type['PREPARE']:
+			break;
+		case Message.Type['REQUEST']:
+			break;
+		case Message.Type['PROMISE']:
+			break;
+		case Message.Type['ACCEPT_REQUEST']:
+			break;
+		case Message.Type['ACCEPT']:
+			break;
+		case Message.Type['RESPONSE']:
+			break;
+		default:
+			break;
+	}
+	
 	do {
 		var randRecip1 = Paxos.MORDECAI.nodes[randIntUnder(Paxos.MORDECAI.nodes.length)];
 		var randRecip2 = Paxos.MORDECAI.nodes[randIntUnder(Paxos.MORDECAI.nodes.length)];

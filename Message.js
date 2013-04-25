@@ -3,31 +3,26 @@ var Message = function(from, to, type, content) {
 	this.to = to;
 	this.type = type;
 	this.content = content;
-	
-	this.type = randIntUnder(7);
-	
+
 	var color;
 	switch (this.type) {
-		case 0:
+		case Message.Type['PREPARE']:
 			color = "rgb(200, 50, 50)";
 			break;
-		case 1:
+		case Message.Type['REQUEST']:
 			color = "rgb(50, 200, 50)";
 			break;
-		case 2:
+		case Message.Type['PROMISE']:
 			color = "rgb(50, 50, 200)";
 			break;
-		case 3:
+		case Message.Type['ACCEPT_REQUEST']:
 			color = "rgb(200, 200, 50)";
 			break;
-		case 4:
+		case Message.Type['ACCEPT']:
 			color = "rgb(200, 50, 200)";
 			break;
-		case 5:
+		case Message.Type['RESPONSE']:
 			color = "rgb(50, 200, 200)";
-			break;
-		case 6:
-			color = "rgb(70, 70, 70)";
 			break;
 		default:
 			color = "rgb(200, 200, 200)";
