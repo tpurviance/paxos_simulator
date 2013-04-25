@@ -1,0 +1,6 @@
+- Nodes need to have their own private database of keys, values, and the proposal number which gave it that value
+- Nodes also need to have the same thing, but a temporary one for deciding which one they're going to go with
+	-> When half acceptors have accepted a value, that moves to the private database
+- Nodes need to be able to find the highest proposal number within the temporary database
+- You accept a value when you get an accept request for a value and you haven't made a promise for a higher value yet
+- When you accept a value you tell the proposer and all of the learners
