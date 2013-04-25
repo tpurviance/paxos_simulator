@@ -1,14 +1,15 @@
 <html>
 	<head>
 		<style>
-		div { 
-			text-align:center;
+		div#content {
+			width:1200;
+			margin:4px auto;
 		}
 		canvas {
 			border:2px solid black;
 		}
 		</style>
-		<script type="application/javascript" src="UIMgr.js"></script>
+		<script type="application/javascript" src="Paxos.js"></script>
 		<script type="application/javascript" src="CanvasMgr.js"></script>
 		<script type="application/javascript" src="Rectangle.js"></script>
 		<script type="application/javascript" src="NodeMgr.js"></script>
@@ -17,47 +18,19 @@
 		<script type="application/javascript" src="Message.js"></script>
 		<script type="application/javascript" src="Functions.js"></script>
 		<script type="application/javascript">
-			var animateLoop = function() {
-				var timestart = Date.now();
-				//canvasClick();
-				msgMgr.updateMsgs();
-				cm.drawCanvas();
-				var timeleft = this.waitTime - (Date.now() - timestart);
-				timeleft = Math.min(5,timeleft);
-				cm.frameTime = timestart - cm.lastFrame ;
-				cm.lastFrame = timestart;
-				setTimeout(animateLoop, timeleft);
-			};
-			
-			window.onload = function() {
-				cm = new CanvasMgr(document.getElementById('canvas'), window.screen.availWidth, window.screen.availHeight, 1000);
-				msgMgr = new MessageMgr();
-				nodeMgr = new NodeMgr();
-
-				var n1 = new Node(100+randIntUnder(300), 100+randIntUnder(200), null, null);
-				var n2 = new Node(100+randIntUnder(300), 500+randIntUnder(200), null, null);
-				new Node(700+randIntUnder(300), 500+randIntUnder(200), null, null);
-				new Node(700+randIntUnder(300), 100+randIntUnder(200), null, null);
-
-				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
-				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
-				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
-				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
-				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
-				new Node(100+randIntUnder(1300), 100+randIntUnder(700), null, null);
-
-				n1.sendMessage(n2, "asdf", "fdsa");
-				
-
-				animateLoop();
-			}
-			
+		window.onload = function() {
+			var LAURA = 'lame';
+			var LAURA_WHINES_A_LOT = new Paxos();
+			LAURA_WHINES_A_LOT.Go();
+		}
 		</script>
 	</head>
 	<body>
-		<div>
-			<div id="uihook"></div>
-			<canvas id="canvas" width="1600" height="900"></canvas>
+		<div id="content">
+			<div id="ui">
+				<input type="text" id="numnodes" value="10" /><input type="submit" id="numnodes_update" value="Update" />
+			</div>
+			<canvas id="canvas" width="1200" height="600"></canvas>
 		</div>
 	</body>
 </html>

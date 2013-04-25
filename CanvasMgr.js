@@ -1,68 +1,68 @@
-			var CanvasMgr = function(canvas, w, h, fps){
-				this.canvas = canvas;
-				canvas.onclick=this.canvasClick;
-				canvas.onkeypress = this.keyPress;
-				this.waitTime = Math.floor(1000/fps);
-				//this.canvas.width = ;
-				//this.canvas.height = ;
-				this.width = canvas.getBoundingClientRect().width;
-				this.height = canvas.getBoundingClientRect().height;
-				this.context2d = this.canvas.getContext("2d");
-				this.backgroundColor = "rgb(255,255,255)";
-				this.lastFrame = Date.now();
-				this.frameTime = 0;
-			}
-			
-			// var rects = 10;
+var CanvasMgr = function(canvas, w, h, fps){
+	this.canvas = canvas;
+	canvas.onclick=this.canvasClick;
+	canvas.onkeypress = this.keyPress;
+	this.waitTime = Math.floor(1000/fps);
+	//this.canvas.width = ;
+	//this.canvas.height = ;
+	this.width = canvas.getBoundingClientRect().width;
+	this.height = canvas.getBoundingClientRect().height;
+	this.context2d = this.canvas.getContext("2d");
+	this.backgroundColor = "rgb(255,255,255)";
+	this.lastFrame = Date.now();
+	this.frameTime = 0;
+}
 
-			CanvasMgr.prototype.canvasClick = function() {
+// var rects = 10;
 
-				// var r = Math.random;
-				// var f = Math.floor;
-				// var rect = new Rectangle(event.offsetX, event.offsetY, 10+r()*70, 10+r()*50, "rgb("+f(r()*257)+","+f(r()*257)+","+f(r()*257)+")",true);
-				// cm.addDrawable(rect, rects);
-				// rects++;
-			};
+CanvasMgr.prototype.canvasClick = function() {
 
-			CanvasMgr.prototype.keyPress = function() {
-				console.log(String.fromCharCode(event.keyCode));
-			};
+	// var r = Math.random;
+	// var f = Math.floor;
+	// var rect = new Rectangle(event.offsetX, event.offsetY, 10+r()*70, 10+r()*50, "rgb("+f(r()*257)+","+f(r()*257)+","+f(r()*257)+")",true);
+	// cm.addDrawable(rect, rects);
+	// rects++;
+};
 
-			CanvasMgr.prototype.drawCanvas = function() {
-				var ctx = this.context2d;
-				
-				ctx.fillStyle = this.backgroundColor;
-				ctx.fillRect(0, 0, this.width, this.height);
+CanvasMgr.prototype.keyPress = function() {
+	console.log(String.fromCharCode(event.keyCode));
+};
 
-				ctx.fillStyle = "rgb(0,0,0)";
-				ctx.font="30px Arial";
-				ctx.fillText("messages:" + msgMgr.movingMsgs.length , 10, 30);
-				ctx.fillText("fps:" + Math.floor(1000.0 / cm.frameTime), 10, 60);
-				
-				nodeMgr.drawNodes(ctx);
-				msgMgr.drawMsgs(ctx);
-				// for (var i = 0; i < this.drawables.length; i++) {
-				// 	this.drawables[i].draw(ctx);
-				// }
-			};
+CanvasMgr.prototype.drawCanvas = function() {
+	var ctx = this.context2d;
+	
+	ctx.fillStyle = this.backgroundColor;
+	ctx.fillRect(0, 0, this.width, this.height);
 
-			CanvasMgr.prototype.stepAnimations = function(time) {
-				for (var i = 0; i < this.animations.length; i++) {
-					this.animations[i].step(time);
-				}
-			};
+	ctx.fillStyle = "rgb(0,0,0)";
+	ctx.font="30px Arial";
+	ctx.fillText("messages:" + Paxos.FUCKUTAYLOR.movingMsgs.length , 10, 30);
+	ctx.fillText("fps:" + Math.floor(1000.0 / Paxos.RIGBY.frameTime), 10, 60);
+	
+	Paxos.MORDECAI.drawNodes(ctx);
+	Paxos.FUCKUTAYLOR.drawMsgs(ctx);
+	// for (var i = 0; i < this.drawables.length; i++) {
+	// 	this.drawables[i].draw(ctx);
+	// }
+};
 
-			// CanvasMgr.prototype.addDrawable = function(drawable){
-			// 	this.drawables.push(drawable);
-			// 	this.drawables.sort(function(a,b){return b.depth-a.depth});
-			// };
-			
-			// CanvasMgr.prototype.addDrawable = function(obj, depth) {
-			// 	var drawable = new Drawable(obj, depth);
-			// 	this.drawables.push(drawable);
-			// 	//var time = new Date().getTime();
-			// 	this.drawables.sort(function(a,b){return a.depth-b.depth});
-			// 	//time = new Date().getTime() - time;
-			// 	//console.log("" + rects + " - " + time);
-			// 	//this.draw();
-			// };
+CanvasMgr.prototype.stepAnimations = function(time) {
+	for (var i = 0; i < this.animations.length; i++) {
+		this.animations[i].step(time);
+	}
+};
+
+// CanvasMgr.prototype.addDrawable = function(drawable){
+// 	this.drawables.push(drawable);
+// 	this.drawables.sort(function(a,b){return b.depth-a.depth});
+// };
+
+// CanvasMgr.prototype.addDrawable = function(obj, depth) {
+// 	var drawable = new Drawable(obj, depth);
+// 	this.drawables.push(drawable);
+// 	//var time = new Date().getTime();
+// 	this.drawables.sort(function(a,b){return a.depth-b.depth});
+// 	//time = new Date().getTime() - time;
+// 	//console.log("" + rects + " - " + time);
+// 	//this.draw();
+// };

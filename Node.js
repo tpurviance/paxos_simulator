@@ -1,31 +1,44 @@
-			var Node = function(x, y, type, ip) {
-				this.x = x;
-				this.y = y;
-				this.type = type;
-				this.ip = ip;
-				this.drawable = new Rectangle(x-50, y-50, 100, 100, "rgb(0,0,128)", true);
-				nodeMgr.nodes.push(this);
-			}
-			
-			Node.prototype.draw = function (context) {
-				this.drawable.draw(context);
-			}
+var Node = function(x, y, type, id) {
+	this.x = x;
+	this.y = y;
+	this.type = type;
+	this.id = id || Node.GetNextId();
+	this.drawable = new Rectangle(x-50, y-50, 100, 100, "rgb(0,0,128)", true);
+	this.isLeader = false;
+}
 
-			// OMG taylor
-			// i before e except after c
-			// dumbass
-			Node.prototype.recieveMessage = function(message) {
+Node.NextId = 0;
+Node.GetNextId = function() {
+	return Node.NextId++;
+}
 
-				do {
-					var randRecip1 = nodeMgr.nodes[randIntUnder(nodeMgr.nodes.length)];
-					var randRecip2 = nodeMgr.nodes[randIntUnder(nodeMgr.nodes.length)];
-				} while (randRecip1 == this || randRecip2 == this || randRecip1 == randRecip2);
+Node.prototype.draw = function (context) {
+	this.drawable.draw(context);
+}
 
-				this.sendMessage(randRecip1, message.type, message.content);
-				this.sendMessage(randRecip2, message.type, message.content);
-			}
+Node.prototype.setLeader = function() {
+	this.isLeader = true;
+	this.drawable.color = "rgb(0,128,0)";
+}
 
-			Node.prototype.sendMessage = function(to, type, content) {
-				var message = new Message(this, to, type, content);
-				message.send();
-			}
+// OMG taylor
+// i before e except after c
+// dumbass
+
+// check message type
+// 
+Node.prototype.recieveMessage = function(message) {
+
+	do {
+		var randRecip1 = Paxos.MORDECAI.nodes[randIntUnder(Paxos.MORDECAI.nodes.length)];
+		var randRecip2 = Paxos.MORDECAI.nodes[randIntUnder(Paxos.MORDECAI.nodes.length)];
+	} while (randRecip1 == this || randRecip2 == this || randRecip1 == randRecip2);
+
+	this.sendMessage(randRecip1, message.type, message.content);
+	this.sendMessage(randRecip2, message.type, message.content);
+}
+
+Node.prototype.sendMessage = function(to, type, content) {
+	var message = new Message(this, to, type, content);
+	message.send();
+}
