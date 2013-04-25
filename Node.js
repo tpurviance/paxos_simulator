@@ -45,7 +45,7 @@ Node.prototype.setLeader = function() {
 
 Node.prototype.receiveMessage = function(message) {
 
-	Logger.getInstance().log('Messaged recieved: ' + message.toString(), -1);
+	Logger.getInstance().log('Message received: ' + message.toString(), -1);
 	var nm = NodeMgr.getInstance();
 
 	switch (message.type) {
@@ -121,7 +121,7 @@ Node.prototype.receiveMessage = function(message) {
 			Logger.getInstance().log('Paxos complete.  The value has been determined to be ' + message.content.data + '.', 1);
 			break;
 		default:
-			Logger.getInstance().log('ERROR: Unknown message type recieved...');
+			Logger.getInstance().log('ERROR: Unknown message type received...');
 			break;
 	}
 
