@@ -9,7 +9,7 @@ var Message = function(from, to, type, content) {
 		case Message.Type['PREPARE']:
 			color = "rgb(200, 50, 50)";
 			break;
-		case Message.Type['REQUEST']:
+		case Message.Type['SYSREQUEST']:
 			color = "rgb(50, 200, 50)";
 			break;
 		case Message.Type['PROMISE']:
@@ -21,7 +21,7 @@ var Message = function(from, to, type, content) {
 		case Message.Type['ACCEPT']:
 			color = "rgb(200, 50, 200)";
 			break;
-		case Message.Type['RESPONSE']:
+		case Message.Type['SYSRESPONSE']:
 			color = "rgb(50, 200, 200)";
 			break;
 		default:
@@ -34,11 +34,11 @@ var Message = function(from, to, type, content) {
 
 Message.Type = {
 					'PREPARE'		: 0,
-					'REQUEST'		: 1,
+					'SYSREQUEST'	: 1,
 					'PROMISE'		: 2,
 					'ACCEPT_REQUEST': 3,
 					'ACCEPT'		: 4,
-					'RESPONSE'		: 5,
+					'SYSRESPONSE'	: 5,
 				};
 
 Message.prototype.send = function() {

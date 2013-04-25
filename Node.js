@@ -5,6 +5,7 @@ var Node = function(x, y, type, id) {
 	this.id = id || Node.GetNextId();
 	this.drawable = new Rectangle(x-50, y-50, 100, 100, "rgb(0,0,128)", true);
 	this.isLeader = false;
+	this.highestProposal = 0;
 	
 	this.database = {};
 	this.unresolved = {};
@@ -30,19 +31,25 @@ Node.prototype.receiveMessage = function(message) {
 
 	switch (message.type) {
 		case Message.Type['PREPARE']:
+			// if acceptor, send leader a promise to only accept proposals >= n. update highest value. else ignore (or send nonacknowledgement for optimization?
 			break;
-		case Message.Type['REQUEST']:
+		case Message.Type['SYSREQUEST']:
 			if (this.isLeader) {
-				this.handleTheThing(); // no not that thing you pervert
+				// send prepare request to acceptors with ID n. save value to be updated. begin accumulating promise responses
 			}
 			break;
 		case Message.Type['PROMISE']:
+			// if leader, accumulate responses. if a majority has been reached, send accept request with the proposal number and value, and start accumulating accept responses
 			break;
 		case Message.Type['ACCEPT_REQUEST']:
+			// if acceptor, if proposal number >= highestProposal, send accept message to leader and learners and save the value (permanently or not?)
 			break;
 		case Message.Type['ACCEPT']:
+			// if leader, accumulate response
+			// if learner, accumulate responses. if a majority has been reached, make the value permanent and send SYSRESPONSE to client
 			break;
-		case Message.Type['RESPONSE']:
+		case Message.Type['SYSRESPONSE']:
+			// should only be used to send to client
 			break;
 		default:
 			alert('awerawlerjaw;lkerjawl;kerjawel;kjr');
@@ -56,10 +63,6 @@ Node.prototype.receiveMessage = function(message) {
 
 	this.sendMessage(randRecip1, message.type, message.content);
 	this.sendMessage(randRecip2, message.type, message.content);
-}
-
-Node.prototype.handleTheThing = function() {
-
 }
 
 Node.prototype.sendMessage = function(to, type, content) {
