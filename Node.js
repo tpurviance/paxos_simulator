@@ -24,13 +24,9 @@ Node.prototype.setLeader = function() {
 	this.drawable.color = "rgb(0,128,0)";
 }
 
-// OMG taylor
-// i before e except after c
-// dumbass
-
 // check message type
 // 
-Node.prototype.recieveMessage = function(message) {
+Node.prototype.receiveMessage = function(message) {
 
 	switch (message.type) {
 		case Message.Type['PREPARE']:

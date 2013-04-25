@@ -12,7 +12,7 @@ MessageMgr.prototype.updateMsgs = function() {
 	while (doneMsgs.length) {
 		var indexAndMess = doneMsgs.pop();
 		this.movingMsgs.splice(indexAndMess[0],1);
-		indexAndMess[1].to.recieveMessage(indexAndMess[1]);
+		indexAndMess[1].to.receiveMessage(indexAndMess[1]);
 	}
 }
 
