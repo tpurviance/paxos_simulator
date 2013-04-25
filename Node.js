@@ -5,7 +5,7 @@
  * id: you probably should pass null or omit this parameter, but if you have a good reason
 		to force an id upon a node you can do it this way. nb that may cause collisions
  */
-var Node = function(x, y, type, id) {
+var Node = function(x, y, type, id, flavors) {
 	this.x = x;
 	this.y = y;
 	this.type = type;
@@ -27,7 +27,7 @@ var Node = function(x, y, type, id) {
 	this.clResSent = false;
 	
 	
-	NodeMgr.getInstance().nodes.push(this);
+	NodeMgr.getInstance().addNode(this, flavors);
 }
 Node.NextId = 0;
 Node.GetNextId = function() {
@@ -55,8 +55,9 @@ Node.prototype.receiveMessage = function(message) {
 				this.proposedData = message.content.data;
 				var propNum = randIntIn(this.highestProposal + 1, this.highestProposal + 4);
 				this.highestProposal = propNum;
-				for (var i = 0, len = nm.nodes.length; i < len; i++) {
-					var node = nm.nodes[i];
+				var acceptors = nm.getFlavoredNodes("acceptor");
+				for (var i = 0, len = acceptors.length; i < len; i++) {
+					var node = acceptors[i];
 					if (node.id != this.id) {
 						this.sendMessage(node, Message.Type['PREPARE'], { 'data': message.content.data, 'proposalNumber':propNum, });
 					}
@@ -82,13 +83,14 @@ Node.prototype.receiveMessage = function(message) {
 					}
 				}
 				this.promisesReceived++;
-				if (!this.acReqSent && this.promisesReceived > NodeMgr.getInstance().nodes.length / 2) {
+				if (!this.acReqSent && this.promisesReceived > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
 					// Quorum of promises
 					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of promises.  Sending ACCEPT_REQUEST messages now...');
 					this.acReqSent = true;
 					var content = this.promiseMsg || {'data':this.proposedData, 'proposalNumber':++this.highestProposal};
-					for (var i = 0, len = nm.nodes.length; i < len; i++) {
-						var node = nm.nodes[i];
+					var acceptors = nm.getFlavoredNodes("acceptor");
+					for (var i = 0, len = acceptors.length; i < len; i++) {
+						var node = acceptors[i];
 						if (node.id != this.id) {
 							this.sendMessage(node, Message.Type['ACCEPT_REQUEST'], content);
 						}
@@ -100,6 +102,15 @@ Node.prototype.receiveMessage = function(message) {
 			// if acceptor, if proposal number >= highestProposal, send accept message to leader and learners and save the value (permanently or not?)
 			if (this.bestSeen < message.content.proposalNumber) {
 				this.acceptedMsg = message.content;
+				// inform the learners
+				var learners = nm.getFlavoredNodes("learner");
+				for (var i = 0, len = learners.length; i < len; i++) {
+					var node = learners[i];
+					if (node.id != this.id) {
+						this.sendMessage(node, Message.Type['ACCEPT'], message.content);
+					}
+				}
+				// inform the proposer
 				this.sendMessage(message.from, Message.Type['ACCEPT'], message.content);
 			}
 			break;
@@ -108,7 +119,15 @@ Node.prototype.receiveMessage = function(message) {
 			// if learner, accumulate responses. if a majority has been reached, make the value permanent and send SYSRESPONSE to client
 			if (this.isLeader) {
 				this.acceptsReceived++;
-				if (!this.clResSent && this.acceptsReceived > NodeMgr.getInstance().nodes.length / 2) {
+				if (!this.clResSent && this.acceptsReceived > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+					// Quorum of accepts
+					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
+					this.clResSent = true;
+					this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);			
+				}
+			} else {
+				this.acceptsReceived++;
+				if (!this.clResSent && this.acceptsReceived > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
 					// Quorum of accepts
 					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
 					this.clResSent = true;
@@ -117,8 +136,12 @@ Node.prototype.receiveMessage = function(message) {
 			}
 			break;
 		case Message.Type['SYSRESPONSE']:
-			// should only be used to send to client
-			Logger.getInstance().log('Paxos complete.  The value has been determined to be ' + message.content.data + '.', 1);
+			if (this.isLeader) {
+				// should only be used to send to client
+				Logger.getInstance().log('Paxos complete.  The value has been determined to be ' + message.content.data + '.', 1);
+			} else {
+				Logger.getInstance().log('Node' + this.id + ' has agreed that the value is ' + message.content.data + '.', 0);
+			}
 			break;
 		default:
 			Logger.getInstance().log('ERROR: Unknown message type received...');

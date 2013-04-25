@@ -25,10 +25,10 @@ Paxos.prototype.go = function() {
 	this.ui.pause.onclick = this.pause;
 	
 	for (var i = 0, len = this.ui.numnodes.input.value; i < len; i++) {
-		new Node(100 + randIntUnder(1020), 100 + randIntUnder(420), null, null);
+		new Node(100 + randIntUnder(1020), 100 + randIntUnder(420), null, null, ["acceptor","learner"]);
 	}
 
-	var n1 = NodeMgr.getInstance().nodes[0];
+	var n1 = NodeMgr.getInstance().nodess[0];
 	n1.setLeader();
 	Logger.getInstance().log('Sending SYSREQUEST to Node #' + n1.id + ' with data e0ad33b7', 1);
 	n1.receiveMessage(new Message(n1, n1, Message.Type['SYSREQUEST'], { 'data':'e0ad33b7'}));
@@ -84,9 +84,9 @@ Paxos.prototype.animateLoop = function() {
 		//canvasClick();
 		MessageMgr.getInstance().updateMsgs();
 		CanvasMgr.getInstance().drawCanvas();
-		var timeleft = inst.waitTime - (Date.now() - timestart);
-		timeleft = Math.min(5,timeleft);
-		CanvasMgr.getInstance().frameTime = timestart - CanvasMgr.getInstance().lastFrame ;
+		var timeleft = (inst.waitTime - (Date.now() - timestart)) || 0;
+		timeleft = Math.max(7,timeleft);
+		CanvasMgr.getInstance().frameTime = (timestart - CanvasMgr.getInstance().lastFrame) || 1 ;
 		CanvasMgr.getInstance().lastFrame = timestart;
 	}
 	setTimeout(inst.animateLoop, timeleft);
