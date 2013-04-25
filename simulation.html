@@ -1,36 +1,33 @@
+<!DOCTYPE html>
 <html>
 	<head>
-		<style>
-		div#content {
-			width:1200;
-			margin:4px auto;
-		}
-		canvas {
-			border:2px solid black;
-		}
-		</style>
-		<script type="application/javascript" src="Paxos.js"></script>
-		<script type="application/javascript" src="CanvasMgr.js"></script>
-		<script type="application/javascript" src="Rectangle.js"></script>
-		<script type="application/javascript" src="NodeMgr.js"></script>
-		<script type="application/javascript" src="Node.js"></script>
-		<script type="application/javascript" src="MessageMgr.js"></script>
-		<script type="application/javascript" src="Message.js"></script>
-		<script type="application/javascript" src="Functions.js"></script>
-		<script type="application/javascript">
+		<title>Paxos!</title>
+		<link rel="stylesheet" href="style.css" />
+		<script src="Paxos.js"></script>
+		<script src="CanvasMgr.js"></script>
+		<script src="Rectangle.js"></script>
+		<script src="NodeMgr.js"></script>
+		<script src="Node.js"></script>
+		<script src="MessageMgr.js"></script>
+		<script src="Message.js"></script>
+		<script src="Logger.js"></script>
+		<script src="Functions.js"></script>
+		<script type="text/javascript">
 		window.onload = function() {
-			var LAURA = 'lame';
-			var LAURA_WHINES_A_LOT = new Paxos();
-			LAURA_WHINES_A_LOT.Go();
+			Paxos.getInstance().go();
 		}
 		</script>
 	</head>
 	<body>
 		<div id="content">
 			<div id="ui">
-				<input type="text" id="numnodes" value="10" /><input type="submit" id="numnodes_update" value="Update" />
+				<p>Number of nodes: <input type="text" id="numnodes" value="8" /><input type="submit" id="numnodes_update" value="Update" /></p>
+				<br />
+				<p><input type="submit" id="pause" value="Pause Simulation" /></p>
+			</div><br />
+			<div id="cnvs"><canvas id="canvas" width="1200" height="600"></canvas></div>
+			<div id="log">
 			</div>
-			<canvas id="canvas" width="1200" height="600"></canvas>
 		</div>
 	</body>
 </html>

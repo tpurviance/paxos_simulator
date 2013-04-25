@@ -1,11 +1,16 @@
+/**
+ * Singleton class to manage nodes n stuff
+ */
+
 var NodeMgr = function() {
 	this.nodes = new Array();
 }
-
-NodeMgr.prototype.createNode = function(x, y, type, id) {
-	var node = new Node(x, y, null, null);
-	this.nodes.push(node);
-	return node;
+NodeMgr.instance = null;
+NodeMgr.getInstance = function() {
+	if (!NodeMgr.instance) {
+		NodeMgr.instance = new NodeMgr();
+	}
+	return NodeMgr.instance;
 }
 
 NodeMgr.prototype.drawNodes = function (context) {

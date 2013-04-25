@@ -1,3 +1,6 @@
+/**
+ * Singleton class, used to manage the canvas etc
+ */
 var CanvasMgr = function(canvas, w, h, fps){
 	this.canvas = canvas;
 	canvas.onclick=this.canvasClick;
@@ -12,9 +15,17 @@ var CanvasMgr = function(canvas, w, h, fps){
 	this.lastFrame = Date.now();
 	this.frameTime = 0;
 }
+CanvasMgr.instance = null;
+CanvasMgr.getInstance = function() {
+	if (!CanvasMgr.instance) {
+		CanvasMgr.instance = new CanvasMgr(document.getElementById('canvas'), window.screen.availWidth, window.screen.availHeight, 1000);
+	}
+	return CanvasMgr.instance;
+}
+
 
 // var rects = 10;
-
+// IDK what Taylor's doing with these event handlers
 CanvasMgr.prototype.canvasClick = function() {
 
 	// var r = Math.random;
@@ -23,10 +34,10 @@ CanvasMgr.prototype.canvasClick = function() {
 	// cm.addDrawable(rect, rects);
 	// rects++;
 };
-
 CanvasMgr.prototype.keyPress = function() {
 	console.log(String.fromCharCode(event.keyCode));
 };
+
 
 CanvasMgr.prototype.drawCanvas = function() {
 	var ctx = this.context2d;
@@ -36,11 +47,11 @@ CanvasMgr.prototype.drawCanvas = function() {
 
 	ctx.fillStyle = "rgb(0,0,0)";
 	ctx.font="30px Arial";
-	ctx.fillText("messages:" + Paxos.FUCKUTAYLOR.movingMsgs.length , 10, 30);
-	ctx.fillText("fps:" + Math.floor(1000.0 / Paxos.RIGBY.frameTime), 10, 60);
+	ctx.fillText("messages:" + MessageMgr.getInstance().movingMsgs.length , 10, 30);
+	ctx.fillText("fps:" + Math.floor(1000.0 / CanvasMgr.getInstance().frameTime), 10, 60);
 	
-	Paxos.MORDECAI.drawNodes(ctx);
-	Paxos.FUCKUTAYLOR.drawMsgs(ctx);
+	NodeMgr.getInstance().drawNodes(ctx);
+	MessageMgr.getInstance().drawMsgs(ctx);
 	// for (var i = 0; i < this.drawables.length; i++) {
 	// 	this.drawables[i].draw(ctx);
 	// }

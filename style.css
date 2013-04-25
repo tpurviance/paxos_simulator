@@ -1,0 +1,23 @@
+* {
+	font-family: Calibri, Arial, sans-serif;
+}
+
+div#content {
+	width:1200px;
+	margin:4px auto;
+}
+canvas {
+	border:2px solid black;
+}
+#log {
+	height:200px;
+	overflow:scroll;
+}
+p {
+	height:12px;
+	margin:4px 0;
+}
+
+.bold {
+	font-weight:bold;
+}

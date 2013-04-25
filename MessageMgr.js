@@ -1,7 +1,20 @@
+/**
+ * Singleton class
+ * Manages all the messages going back and forth
+ */
 var MessageMgr = function() {
 	this.movingMsgs = new Array();
 }
+MessageMgr.instance = null;
+MessageMgr.getInstance = function() {
+	if (!MessageMgr.instance) {
+		MessageMgr.instance = new MessageMgr();
+	}
+	return MessageMgr.instance;
+}
 
+/** Check active messages - if they're done, play the AOL "you've got mail!" sound
+ *	on the recipient's computer */
 MessageMgr.prototype.updateMsgs = function() {
 	var doneMsgs = new Array();
 	for(var i = 0; i < this.movingMsgs.length; i++) {
@@ -16,6 +29,7 @@ MessageMgr.prototype.updateMsgs = function() {
 	}
 }
 
+/** TODO: The message mgr shouldn't be responsible for drawing the messages */
 MessageMgr.prototype.drawMsgs = function(context) {
 	for(var i = 0; i < this.movingMsgs.length; i++) {
 		this.movingMsgs[i].draw(context);
