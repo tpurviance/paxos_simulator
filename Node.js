@@ -5,6 +5,9 @@ var Node = function(x, y, type, id) {
 	this.id = id || Node.GetNextId();
 	this.drawable = new Rectangle(x-50, y-50, 100, 100, "rgb(0,0,128)", true);
 	this.isLeader = false;
+	
+	this.database = {};
+	this.unresolved = {};
 }
 
 Node.NextId = 0;
@@ -33,6 +36,9 @@ Node.prototype.recieveMessage = function(message) {
 		case Message.Type['PREPARE']:
 			break;
 		case Message.Type['REQUEST']:
+			if (this.isLeader) {
+				this.handleTheThing(); // no not that thing you pervert
+			}
 			break;
 		case Message.Type['PROMISE']:
 			break;
@@ -43,6 +49,7 @@ Node.prototype.recieveMessage = function(message) {
 		case Message.Type['RESPONSE']:
 			break;
 		default:
+			alert('awerawlerjaw;lkerjawl;kerjawel;kjr');
 			break;
 	}
 	
@@ -53,6 +60,10 @@ Node.prototype.recieveMessage = function(message) {
 
 	this.sendMessage(randRecip1, message.type, message.content);
 	this.sendMessage(randRecip2, message.type, message.content);
+}
+
+Node.prototype.handleTheThing = function() {
+
 }
 
 Node.prototype.sendMessage = function(to, type, content) {
