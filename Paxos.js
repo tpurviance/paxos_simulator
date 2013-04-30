@@ -24,8 +24,12 @@ Paxos.prototype.go = function() {
 	this.ui.pause = document.getElementById('pause');
 	this.ui.pause.onclick = this.pause;
 	
+	var rows = 3;
+	var npr = Math.ceil(this.ui.numnodes.input.value / rows);
 	for (var i = 0, len = this.ui.numnodes.input.value; i < len; i++) {
-		new Node(100 + randIntUnder(1020), 100 + randIntUnder(420), null, null, ["acceptor","learner"]);
+		var x = 100 + Math.floor(1100 / npr) * (i % npr);
+		var y  = 150 + 180 * Math.floor(i / npr);
+		new Node(x, y, null, null, ["acceptor","learner"]);
 	}
 
 	var n1 = NodeMgr.getInstance().nodess[0];
@@ -34,7 +38,7 @@ Paxos.prototype.go = function() {
 	n1.receiveMessage(new Message(n1, n1, Message.Type['SYSREQUEST'], { 'data':'e0ad33b7'}));
 				
 
-	this.animateLoop();
+	this.timeoutInterval = window.setInterval(this.animateLoop, 10);
 }
 
 /**
@@ -52,6 +56,7 @@ Paxos.prototype.reboot = function() {
 	if (Paxos.getInstance().ui.numnodes.input.value < 3)
 		Paxos.getInstance().ui.numnodes.input.value = 3;
 	
+	window.clearInterval(Paxos.instance.timeoutInterval);
 	Paxos.instance = null;
 	CanvasMgr.instance = null;
 	NodeMgr.instance = null;
@@ -84,10 +89,10 @@ Paxos.prototype.animateLoop = function() {
 		//canvasClick();
 		MessageMgr.getInstance().updateMsgs();
 		CanvasMgr.getInstance().drawCanvas();
-		var timeleft = (inst.waitTime - (Date.now() - timestart)) || 0;
-		timeleft = Math.max(7,timeleft);
+		//var timeleft = (inst.waitTime - (Date.now() - timestart)) || 0;
+		//timeleft = Math.max(7,timeleft);
+		var timeleft = 1000 / 60;
 		CanvasMgr.getInstance().frameTime = (timestart - CanvasMgr.getInstance().lastFrame) || 1 ;
 		CanvasMgr.getInstance().lastFrame = timestart;
 	}
-	setTimeout(inst.animateLoop, timeleft);
 };
