@@ -4,6 +4,7 @@
 
 var NodeMgr = function() {
 	this.nodess = new Array();
+	this.clientNode = {};
 	this.nodeFlavors = new Array();
 }
 NodeMgr.instance = null;
@@ -34,6 +35,10 @@ NodeMgr.prototype.getAllNodes = function() {
 
 
 NodeMgr.prototype.drawNodes = function (context) {
+	// draw client
+	this.clientNode.draw(context);
+	
+	// draw paxos nodes	
 	for(var i = 0; i < this.nodess.length; i++) {
 		this.nodess[i].draw(context);
 	}

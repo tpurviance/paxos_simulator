@@ -1,3 +1,9 @@
+var constants = {
+	'canvasMargin':	100,
+	'nodeSize':		100,
+	'messageSize':	20
+}
+
 /** Returns 1 if the value is > 0, -1 if the value is < 0, or 0 if the value is exactly 0 */
 var sign = function(value) {
 	return (value > 0 ? 1 : (value < 0 ? -1 : 0));

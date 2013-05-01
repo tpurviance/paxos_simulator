@@ -46,9 +46,9 @@ CanvasMgr.prototype.drawCanvas = function() {
 	ctx.fillRect(0, 0, this.width, this.height);
 
 	ctx.fillStyle = "rgb(0,0,0)";
-	ctx.font="30px Arial";
-	ctx.fillText("messages:" + MessageMgr.getInstance().movingMsgs.length , 10, 30);
-	ctx.fillText("fps:" + Math.floor(1000.0 / CanvasMgr.getInstance().frameTime), 10, 60);
+	ctx.font="15px Arial";
+	ctx.fillText("messages:" + MessageMgr.getInstance().movingMsgs.length , 8, 15);
+	ctx.fillText("fps:" + Math.floor(1000.0 / CanvasMgr.getInstance().frameTime), 8, 30);
 	
 	NodeMgr.getInstance().drawNodes(ctx);
 	MessageMgr.getInstance().drawMsgs(ctx);

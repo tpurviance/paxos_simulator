@@ -14,29 +14,29 @@ var Message = function(from, to, type, content) {
 	var color;
 	switch (this.type) {
 		case Message.Type['PREPARE']:
-			color = "rgb(200, 50, 50)";
+			color = "Crimson";
 			break;
 		case Message.Type['SYSREQUEST']:
-			color = "rgb(50, 200, 50)";
+			color = "Gold";
 			break;
 		case Message.Type['PROMISE']:
-			color = "rgb(50, 50, 200)";
+			color = "BlueViolet";
 			break;
 		case Message.Type['ACCEPT_REQUEST']:
-			color = "rgb(200, 200, 50)";
+			color = "Coral";
 			break;
 		case Message.Type['ACCEPT']:
-			color = "rgb(200, 50, 200)";
+			color = "CornflowerBlue";
 			break;
 		case Message.Type['SYSRESPONSE']:
-			color = "rgb(50, 200, 200)";
+			color = "LightGreen";
 			break;
 		default:
 			color = "rgb(200, 200, 200)";
 			break;
 	}
 	
-	this.drawable = new Rectangle(from.x, from.y, 20, 20, color, true);
+	this.drawable = new Rectangle(from.x, from.y, constants.messageSize, constants.messageSize, color, true);
 }
 
 /**

@@ -10,7 +10,7 @@ var Node = function(x, y, type, id, flavors) {
 	this.y = y;
 	this.type = type;
 	this.id = id || Node.GetNextId();
-	this.drawable = new Rectangle(x-50, y-50, 100, 100, "rgb(0,0,128)", true);
+	this.drawable = new Rectangle(x-(constants.nodeSize/2), y-(constants.nodeSize/2), constants.nodeSize, constants.nodeSize, "Navy", true);
 	this.isLeader = false;
 	
 	// Acceptor fields
@@ -26,8 +26,12 @@ var Node = function(x, y, type, id, flavors) {
 	this.acReqSent = false;
 	this.clResSent = false;
 	
-	
-	NodeMgr.getInstance().addNode(this, flavors);
+	if(flavors.indexOf("client") != -1) {
+		this.drawable.color = "DarkRed";
+		NodeMgr.getInstance().clientNode = this;
+	} else {
+		NodeMgr.getInstance().addNode(this, flavors);
+	}
 }
 Node.NextId = 0;
 Node.GetNextId = function() {
@@ -40,7 +44,7 @@ Node.prototype.draw = function (context) {
 
 Node.prototype.setLeader = function() {
 	this.isLeader = true;
-	this.drawable.color = "rgb(0,128,0)";
+	this.drawable.color = "ForestGreen";
 }
 
 Node.prototype.receiveMessage = function(message) {

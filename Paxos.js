@@ -26,16 +26,22 @@ Paxos.prototype.go = function() {
 	
 	var rows = 3;
 	var npr = Math.ceil(this.ui.numnodes.input.value / rows);
+	
+	// Place the client node in the first column, middle row
+	new Node(constants.canvasMargin, constants.canvasMargin + 180 * Math.floor(1 / npr), null, null, ["client"]);
+	
+	// Place the rest of the nodes in the rest of the columns
 	for (var i = 0, len = this.ui.numnodes.input.value; i < len; i++) {
-		var x = 100 + Math.floor(1100 / npr) * (i % npr);
-		var y  = 150 + 180 * Math.floor(i / npr);
+		var x = constants.canvasMargin + Math.floor((CanvasMgr.getInstance().canvas.width - 2*constants.canvasMargin) / npr) * ((i % npr) + 1);
+		var y  = constants.canvasMargin + 180 * Math.floor(i / npr);
 		new Node(x, y, null, null, ["acceptor","learner"]);
 	}
-
+	
+	var cli = NodeMgr.getInstance().clientNode;
 	var n1 = NodeMgr.getInstance().nodess[0];
 	n1.setLeader();
 	Logger.getInstance().log('Sending SYSREQUEST to Node #' + n1.id + ' with data e0ad33b7', 1);
-	n1.receiveMessage(new Message(n1, n1, Message.Type['SYSREQUEST'], { 'data':'e0ad33b7'}));
+	cli.sendMessage(n1, Message.Type['SYSREQUEST'], { 'data':'e0ad33b7'});
 				
 
 	this.timeoutInterval = window.setInterval(this.animateLoop, 10);
