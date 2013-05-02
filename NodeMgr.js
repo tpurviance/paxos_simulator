@@ -5,6 +5,7 @@
 var NodeMgr = function() {
 	this.nodess = new Array();
 	this.clientNode = {};
+	this.leaderNode = null;
 	this.nodeFlavors = new Array();
 }
 NodeMgr.instance = null;

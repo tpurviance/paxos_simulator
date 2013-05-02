@@ -16,6 +16,18 @@
 		window.onload = function() {
 			Paxos.getInstance().go();
 		}
+		
+		// Pause simulation on spacebar.
+		document.onkeypress = function(e) {
+			var key = ( window.event ) ? event.keyCode : e.keyCode;
+     
+			switch( key )
+			{
+			  case 32:
+				Paxos.getInstance().pause();
+				return false;
+			}
+		}
 		</script>
 	</head>
 	<body>
@@ -24,6 +36,8 @@
 				<p>Number of nodes: <input type="text" id="numnodes" value="9" /><input type="submit" id="numnodes_update" value="Update" /></p>
 				<br />
 				<p><input type="submit" id="pause" value="Pause Simulation" /></p>
+				<br />
+				<p>Submit a value to the system: <input type="text" id="update_text" value="e0ad33b7" /><input type="submit" id="submit_update" value="Submit" /></p>
 			</div><br />
 			<div id="cnvs"><canvas id="canvas" width="1200" height="600"></canvas></div>
 			<div id="log">

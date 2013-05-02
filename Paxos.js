@@ -21,6 +21,12 @@ Paxos.prototype.go = function() {
 	this.ui.numnodes.input = document.getElementById('numnodes');
 	this.ui.numnodes.submit = document.getElementById('numnodes_update');
 	this.ui.numnodes.submit.onclick = this.reboot;
+	
+	this.ui.updateval = {};
+	this.ui.updateval.input = document.getElementById('update_text');
+	this.ui.updateval.submit = document.getElementById('submit_update');
+	this.ui.updateval.submit.onclick = function(e) { Paxos.getInstance().submitUpdate(Paxos.getInstance().ui.updateval.input.value); };
+	
 	this.ui.pause = document.getElementById('pause');
 	this.ui.pause.onclick = this.pause;
 	
@@ -37,14 +43,19 @@ Paxos.prototype.go = function() {
 		new Node(x, y, null, null, ["acceptor","learner"]);
 	}
 	
-	var cli = NodeMgr.getInstance().clientNode;
 	var n1 = NodeMgr.getInstance().nodess[0];
 	n1.setLeader();
-	Logger.getInstance().log('Sending SYSREQUEST to Node #' + n1.id + ' with data e0ad33b7', 1);
-	cli.sendMessage(n1, Message.Type['SYSREQUEST'], { 'data':'e0ad33b7'});
-				
+	
+	//this.submitUpdate('e0ad33b7');
 
 	this.timeoutInterval = window.setInterval(this.animateLoop, 10);
+}
+
+Paxos.prototype.submitUpdate = function(value) {
+	var leader = NodeMgr.getInstance().leaderNode;
+	var cli = NodeMgr.getInstance().clientNode;
+	Logger.getInstance().log('Sending SYSREQUEST to Node #' + leader.id + ' with data e0ad33b7', 1);
+	cli.sendMessage(leader, Message.Type['SYSREQUEST'], { 'data': value });
 }
 
 /**

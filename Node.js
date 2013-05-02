@@ -58,6 +58,7 @@ Node.prototype.draw = function (context) {
 
 Node.prototype.setLeader = function() {
 	this.isLeader = true;
+	NodeMgr.getInstance().leaderNode = this;
 	this.drawable.color = "ForestGreen";
 }
 
