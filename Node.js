@@ -167,6 +167,15 @@ Node.prototype.receiveMessage = function(message) {
 				Logger.getInstance().log('Node' + this.id + ' has agreed that the value is ' + message.content.data + '.', 0);
 			}
 			break;
+		case Message.Type['SELFBROADCAST']:
+			
+			break;
+		case Message.Type['HIGHBROADCAST']:
+			
+			break;
+		case Message.Type['HIGHPROMISE']:
+			
+			break;
 		default:
 			Logger.getInstance().log('ERROR: Unknown message type received...');
 			break;

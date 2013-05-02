@@ -40,7 +40,7 @@ Paxos.prototype.go = function() {
 	for (var i = 0, len = this.ui.numnodes.input.value; i < len; i++) {
 		var x = constants.canvasMargin + Math.floor((CanvasMgr.getInstance().canvas.width - 2*constants.canvasMargin) / npr) * ((i % npr) + 1);
 		var y  = constants.canvasMargin + 180 * Math.floor(i / npr);
-		new Node(x, y, null, null, ["acceptor","learner"]);
+		new Node(x, y, null, null, ["proposer","acceptor","learner"]);
 	}
 	
 	var n1 = NodeMgr.getInstance().nodess[0];

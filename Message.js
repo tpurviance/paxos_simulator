@@ -49,6 +49,9 @@ Message.Type = {
 					'ACCEPT_REQUEST': 3, // Sent from proposer to acceptors once it has enough promises
 					'ACCEPT'		: 4, // Sometimes sent in response to an accept request 
 					'SYSRESPONSE'	: 5, // Sent from a proposer to the external system once it receives enough "accepted" messages
+					'SELFBROADCAST'	: 6, // sent from a proposer to other proposers telling of its own ID (round 1 of elections)
+					'HIGHBROADCAST'	: 7, // sent from a proposer to other proposers telling of the highest ID it's heard of in round 2 of elections
+					'HIGHPROMISE'	: 8, // sent from a proposer to other proposers telling of the highest ID it heard of in round 2 (round 3 of elections)
 				};
 
 Message.prototype.send = function() {
