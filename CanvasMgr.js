@@ -26,13 +26,11 @@ CanvasMgr.getInstance = function() {
 
 // var rects = 10;
 // IDK what Taylor's doing with these event handlers
-CanvasMgr.prototype.canvasClick = function() {
-
-	// var r = Math.random;
-	// var f = Math.floor;
-	// var rect = new Rectangle(event.offsetX, event.offsetY, 10+r()*70, 10+r()*50, "rgb("+f(r()*257)+","+f(r()*257)+","+f(r()*257)+")",true);
-	// cm.addDrawable(rect, rects);
-	// rects++;
+CanvasMgr.prototype.canvasClick = function(event) {
+	var clickedOn = NodeMgr.getInstance().getAtClick(event.offsetX, event.offsetY);
+	if (clickedOn) { 
+		clickedOn.switchRogue();
+	}
 };
 CanvasMgr.prototype.keyPress = function() {
 	console.log(String.fromCharCode(event.keyCode));

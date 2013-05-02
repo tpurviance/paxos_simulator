@@ -34,6 +34,13 @@ NodeMgr.prototype.getAllNodes = function() {
 	return this.nodess;
 }
 
+NodeMgr.prototype.getAtClick = function(x, y) {
+	for(var i = 0; i < this.nodess.length; i++) {
+		if (this.nodess[i].containsPoint(x,y)) {
+			return this.nodess[i];
+		}
+	}
+}
 
 NodeMgr.prototype.drawNodes = function (context) {
 	// draw client

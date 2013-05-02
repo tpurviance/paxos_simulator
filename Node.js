@@ -12,6 +12,7 @@ var Node = function(x, y, type, id, flavors) {
 	this.id = id || Node.GetNextId();
 	this.drawable = new Rectangle(x-(constants.nodeSize/2), y-(constants.nodeSize/2), constants.nodeSize, constants.nodeSize, "Navy", true);
 	this.isLeader = false;
+	this.isRogue = false;
 	
 	// Acceptor fields
 	this.highestSeen = -1; // store the highest proposal number you've seen
@@ -63,6 +64,10 @@ Node.prototype.setLeader = function() {
 }
 
 Node.prototype.receiveMessage = function(message) {
+	if(this.isRogue){
+		Logger.getInstance().log('Message not recieved: ' + message.toString(), -1);
+		return;
+	}
 
 	Logger.getInstance().log('Message received: ' + message.toString(), -1);
 	var nm = NodeMgr.getInstance();
@@ -183,4 +188,18 @@ Node.prototype.receiveMessage = function(message) {
 Node.prototype.sendMessage = function(to, type, content) {
 	var message = new Message(this, to, type, content);
 	message.send();
+}
+
+Node.prototype.switchRogue = function() {
+	this.isRogue = !this.isRogue;
+	if (this.isRogue) {
+		this.oldDrawableColor = this.drawable.color;
+		this.drawable.color = "darkGrey";
+	} else {
+		this.drawable.color = this.oldDrawableColor;
+	}
+}
+
+Node.prototype.containsPoint = function(x, y) {
+	return (Math.abs(x - this.x) < constants.nodeSize && Math.abs(y - this.y) < constants.nodeSize)
 }
