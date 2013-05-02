@@ -46,7 +46,7 @@ Message.Type = {
 					'SYSREQUEST'	: 0, // An external request to propagate some information. Sent to propsers
 					'PREPARE'		: 1, // A message from a proposer to acceptors
 					'PROMISE'		: 2, // A message from acceptors to proposers
-					'ACCEPT_REQUEST': 3, // Sent from proposor to acceptors once it has enough promises
+					'ACCEPT_REQUEST': 3, // Sent from proposer to acceptors once it has enough promises
 					'ACCEPT'		: 4, // Sometimes sent in response to an accept request 
 					'SYSRESPONSE'	: 5, // Sent from a proposer to the external system once it receives enough "accepted" messages
 				};

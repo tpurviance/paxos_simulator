@@ -40,6 +40,20 @@ Node.GetNextId = function() {
 
 Node.prototype.draw = function (context) {
 	this.drawable.draw(context);
+	
+	// Write some text on the node
+	var textLines = ["ID: " + this.id];
+	if(this.isLeader) {
+		textLines = textLines.concat(["Proposed: " + (this.proposedData ? this.proposedData : null), "Promises: " + this.promisesReceived, "Accepts: " + this.acceptsReceived]);
+	} else if(this !== NodeMgr.getInstance().clientNode) {
+		textLines = textLines.concat(["Value: " + (this.acceptedMsg ? this.acceptedMsg.data : null), "Highest proposal: " + this.highestProposal]);
+	}
+	
+	context.fillStyle = "MintCream";
+	context.font="10px Arial";
+	for(var i = 0, len = textLines.length; i < len; i++) {
+		context.fillText(textLines[i], this.x - constants.nodeSize/2 + 3, this.y - constants.nodeSize/2 + 2 + (i+1)*10);
+	}
 }
 
 Node.prototype.setLeader = function() {
@@ -127,7 +141,7 @@ Node.prototype.receiveMessage = function(message) {
 					// Quorum of accepts
 					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
 					this.clResSent = true;
-					this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);			
+					this.sendMessage(NodeMgr.getInstance().clientNode, Message.Type['SYSRESPONSE'], message.content);			
 				}
 			} else {
 				this.acceptsReceived++;
@@ -135,12 +149,12 @@ Node.prototype.receiveMessage = function(message) {
 					// Quorum of accepts
 					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
 					this.clResSent = true;
-					this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);			
+					this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);		
 				}
 			}
 			break;
 		case Message.Type['SYSRESPONSE']:
-			if (this.isLeader) {
+			if (this === NodeMgr.getInstance().clientNode) {
 				// should only be used to send to client
 				Logger.getInstance().log('Paxos complete.  The value has been determined to be ' + message.content.data + '.', 1);
 			} else {
@@ -150,7 +164,9 @@ Node.prototype.receiveMessage = function(message) {
 		default:
 			Logger.getInstance().log('ERROR: Unknown message type received...');
 			break;
-	}
+	
+	this.draw(CanvasMgr.getInstance().context2d);
+}
 
 /*
 	do {
