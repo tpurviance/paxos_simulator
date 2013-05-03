@@ -32,6 +32,8 @@ var Node = function(x, y, type, id, flavors) {
 		NodeMgr.getInstance().clientNode = this;
 	} else {
 		NodeMgr.getInstance().addNode(this, flavors);
+		
+		// TODO Send ID broadcast to all other nodes
 	}
 }
 Node.NextId = 0;
@@ -168,13 +170,18 @@ Node.prototype.receiveMessage = function(message) {
 			}
 			break;
 		case Message.Type['SELFBROADCAST']:
-			
+			// Add to tally
+			// If tally is > n/2 and still in first phase, send out HIGHBROADCAST using the highest ID seen and move to 2nd phase
 			break;
 		case Message.Type['HIGHBROADCAST']:
-			
+			// Add to list of (ID, HID)
+			// Update highest ID if needed
+			// If > n/2 responses and still in 2nd phase, send out HIGHPROMISE using new HID and move to 3rd phase
+			// (What if HID is not agreed upon by the majority?)
 			break;
 		case Message.Type['HIGHPROMISE']:
-			
+			// Add to list of (ID, HID) promises
+			// if > n/2 have promised to the same HID, set HID as elected leader and if self is not HID, remove 'proposer' from self's flavors.
 			break;
 		default:
 			Logger.getInstance().log('ERROR: Unknown message type received...');
