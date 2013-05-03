@@ -14,18 +14,25 @@ var Node = function(x, y, type, id, flavors) {
 	this.isLeader = false;
 	this.isRogue = false;
 	
+	
 	// Acceptor fields
 	this.highestSeen = -1; // store the highest proposal number you've seen
 	this.acceptedMsg = null; // if you accept, store the message content
+	this.highestInstance = -1;
 
 	// Proposer fields
 	this.proposedData = null; // store the data we're trying to push through
 	this.highestProposal = 0; // highest proposal # ever used by this node
+	this.currentInstance = 1; // the current instance (used for multipaxosing)
 	this.promiseMsg = null; // if a promise has a payload, store it here
-	this.promisesReceived = 0;
-	this.acceptsReceived = 0;
-	this.acReqSent = false;
-	this.clResSent = false;
+	this.promisesReceived = [];
+	this.acceptsReceived = [];
+	this.acReqSent = false; // has a bunch of accept requests been sent?
+	this.clResSent = false; // has the client been informed?
+	this.isSteadyStating= false; // if currently leading multipaxos in steady state.
+	this.sentAccepts = [];
+	this.isDone = false;
+	this.highestCompetitorProp = -1;
 	
 	// Election fields
 	this.sbReceived = 0;
@@ -48,11 +55,19 @@ Node.GetNextId = function() {
 
 Node.prototype.draw = function (context) {
 	this.drawable.draw(context);
-	
+
 	// Write some text on the node
-	var textLines = ["ID: " + this.id];
+	var types = ""
+	types += (NodeMgr.getInstance().getFlavoredNodes("proposer").contains(this) ? "P " : "  ");
+	types += (NodeMgr.getInstance().getFlavoredNodes("acceptor").contains(this) ? "A " : "  ");
+	types += (NodeMgr.getInstance().getFlavoredNodes("learner").contains(this) ? "L " : "  ");
+
+	var textLines = ["ID: " + this.id + "  " + types];
 	if(this.isLeader) {
-		textLines = textLines.concat(["Proposed: " + (this.proposedData ? this.proposedData : null), "Promises: " + this.promisesReceived, "Accepts: " + this.acceptsReceived]);
+		textLines = textLines.concat(["Proposed: " + (this.proposedData ? this.proposedData : null), 
+										"Promises: " + this.promisesReceived.length, 
+										"Accepts: " + this.acceptsReceived.length,
+										"Prop/Iter: " + this.highestProposal +"/" + this.currentInstance])
 	} else if(this !== NodeMgr.getInstance().clientNode) {
 		textLines = textLines.concat(["Value: " + (this.acceptedMsg ? this.acceptedMsg.data : null), "Highest proposal: " + this.highestProposal]);
 	}
@@ -89,13 +104,31 @@ Node.prototype.receiveMessage = function(message) {
 			if (this.isLeader) {
 				// send prepare request to acceptors with ID n. save value to be updated. begin accumulating promise responses
 				this.proposedData = message.content.data;
-				var propNum = randIntIn(this.highestProposal + 1, this.highestProposal + 4);
+				this.promiseMsg = null; 
+				this.promisesReceived = [];
+				this.acceptsReceived = [];
+				this.acReqSent = false; 
+				this.clResSent = false; 
+				this.sentAccepts = [];
+				this.isDone = false;
+
+				var propNum;
+				if(this.isSteadyStating) { 
+					propNum = this.highestProposal;
+					this.currentInstance += 1;
+				} else {
+					propNum = randIntIn(this.highestProposal + 1, this.highestProposal + 4);
+				}
 				this.highestProposal = propNum;
 				var acceptors = nm.getFlavoredNodes("acceptor");
 				for (var i = 0, len = acceptors.length; i < len; i++) {
 					var node = acceptors[i];
-					if (node.id != this.id) {
-						this.sendMessage(node, Message.Type['PREPARE'], { 'data': message.content.data, 'proposalNumber':propNum, });
+					if(!this.isSteadyStating) { 
+						this.sendMessage(node, Message.Type['PREPARE'], { 'data': message.content.data, 'proposalNumber':propNum, 
+								'instanceNumber':this.currentInstance});
+					}else{
+						this.sendMessage(node, Message.Type['ACCEPT_REQUEST'], { 'data': message.content.data, 'proposalNumber':propNum, 
+								'instanceNumber':this.currentInstance});
 					}
 				}
 			}
@@ -103,41 +136,55 @@ Node.prototype.receiveMessage = function(message) {
 		case Message.Type['PREPARE']:
 			// if acceptor, send leader a promise to only accept proposals >= n. update highest value. else ignore (or send nonacknowledgement for optimization?
 			if (!this.highestSeen || this.highestSeen < message.content.proposalNumber) {
-				this.bestSeen = message.content.proposalNumber;
-				this.sendMessage(message.from, Message.Type['PROMISE'], (this.acceptedMsg) ? this.acceptedMsg : null);
+				this.highestSeen = message.content.proposalNumber;
+				this.favoriteProposal = message.content;
+				this.sendMessage(message.from, Message.Type['PROMISE'], this.favoriteProposal);
 			} else {
-				// Do nothing / send nack
+				//old prop / send nack
 			}
 			break;
 		case Message.Type['PROMISE']:
 			// if leader, accumulate responses. if a majority has been reached, send accept request with the proposal number and value, and start accumulating accept responses
 			if (this.isLeader) {
-				if (message.content) {
-					// Payload on the PROMISE => this acceptor has already accepted a value
-					if (!this.promiseMsg || message.content.proposalNumber > this.promiseMsg.proposalNumber) {
-						this.promiseMsg = message.content;
-					}
-				}
-				this.promisesReceived++;
-				if (!this.acReqSent && this.promisesReceived > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
-					// Quorum of promises
-					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of promises.  Sending ACCEPT_REQUEST messages now...');
-					this.acReqSent = true;
-					var content = this.promiseMsg || {'data':this.proposedData, 'proposalNumber':++this.highestProposal};
-					var acceptors = nm.getFlavoredNodes("acceptor");
-					for (var i = 0, len = acceptors.length; i < len; i++) {
-						var node = acceptors[i];
-						if (node.id != this.id) {
-							this.sendMessage(node, Message.Type['ACCEPT_REQUEST'], content);
+				if (message.content.proposalNumber > this.highestProposal) {
+					// the acceptor sending this has seen a higher proposal number
+					this.highestCompetitorProp = message.content.proposalNumber;
+					// TODO: add code to handle dueling leaders.
+				} else if(message.content.proposalNumber == this.highestProposal) {
+						if (this.isSteadyStating) {
+							// TODO: this really shouldn't happen, so i don't know.
+						} else {
+						this.promisesReceived.push(message.from);
+						if (!this.isDone && this.promisesReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+							// Quorum of promises
+							if (!this.acReqSent) { 
+								Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of promises.  Sending ACCEPT_REQUEST messages now...');
+								this.acReqSent = true;
+							}
+							var content = this.promiseMsg || {'data':this.proposedData, 'proposalNumber':++this.highestProposal, 'instanceNumber':this.currentInstance};
+							var acceptors = nm.getFlavoredNodes("acceptor");
+							for (var i = 0, len = acceptors.length; i < len; i++) {
+								var node = acceptors[i];
+								if (!(this.sentAccepts.contains(node))) {
+									this.sendMessage(node, Message.Type['ACCEPT_REQUEST'], content);
+									this.sentAccepts.push(node);
+								}
+							}
 						}
 					}
 				}
 			}
 			break;
 		case Message.Type['ACCEPT_REQUEST']:
+
+
+
 			// if acceptor, if proposal number >= highestProposal, send accept message to leader and learners and save the value (permanently or not?)
-			if (this.bestSeen < message.content.proposalNumber) {
+			if (this.highestSeen < message.content.proposalNumber ||
+						this.highestSeen == message.content.proposalNumber && this.highestInstance < message.content.instanceNumber) {
 				this.acceptedMsg = message.content;
+				this.highestSeen = message.content.proposalNumber;
+				this.highestInstance = message.content.instanceNumber;
 				// inform the learners
 				var learners = nm.getFlavoredNodes("learner");
 				for (var i = 0, len = learners.length; i < len; i++) {
@@ -146,28 +193,37 @@ Node.prototype.receiveMessage = function(message) {
 						this.sendMessage(node, Message.Type['ACCEPT'], message.content);
 					}
 				}
-				// inform the proposer
-				this.sendMessage(message.from, Message.Type['ACCEPT'], message.content);
+				// inform the proposer in case he isn't a learner
+				if(!nm.getFlavoredNodes("learner").contains(message.from))
+					this.sendMessage(message.from, Message.Type['ACCEPT'], message.content);
+			} else { 
+				// isn't the highest seen
 			}
 			break;
 		case Message.Type['ACCEPT']:
 			// if leader, accumulate response
 			// if learner, accumulate responses. if a majority has been reached, make the value permanent and send SYSRESPONSE to client
 			if (this.isLeader) {
-				this.acceptsReceived++;
-				if (!this.clResSent && this.acceptsReceived > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+				this.acceptsReceived.push(message.from)
+				if (!this.isDone && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
 					// Quorum of accepts
-					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
-					this.clResSent = true;
-					this.sendMessage(NodeMgr.getInstance().clientNode, Message.Type['SYSRESPONSE'], message.content);			
+					if (!this.clResSent) { 
+						Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
+						this.clResSent = true;
+						this.sendMessage(NodeMgr.getInstance().clientNode, Message.Type['SYSRESPONSE'], message.content);	
+						this.isDone = true;
+					}
+					this.isSteadyStating = true;
 				}
 			} else {
-				this.acceptsReceived++;
-				if (!this.clResSent && this.acceptsReceived > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+				this.acceptsReceived.push(message.from);
+				if (!this.clResSent && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
 					// Quorum of accepts
-					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
-					this.clResSent = true;
-					this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);
+					if (!this.clResSent) { 
+						Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
+						this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);
+						this.clResSent = true;
+					}
 				}
 			}
 			break;
@@ -222,9 +278,10 @@ Node.prototype.receiveMessage = function(message) {
 			if (agr && agr >= 0) {
 				Logger.getInstance().log('Node ' + this.id + ' has received HIGHPROMISES from a majority of nodes vouching for ' + agr, 1);
 				NodeMgr.getInstance().leader = agr;
-				if (agr != this.id)
-					this.flavors = removeA(this.flavors, 'proposer');
-				else
+				//if (agr != this.id)
+				//	this.flavors = removeA(this.flavors, 'proposer');
+				//else
+				if(agr == this.id)
 					this.setLeader();
 				this.electionPhase = 4;
 			}

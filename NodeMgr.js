@@ -66,7 +66,7 @@ NodeMgr.prototype.sendBroadcasts = function() {
 NodeMgr.prototype.resetNodeState = function() {
 	for(var i = 0, len = this.nodess.length; i < len; i++) {
 		var nd = this.nodess[i];
-		nd.acceptsReceived = 0;
-		nd.promisesReceived = 0;
+		nd.acceptsReceived = [];
+		nd.promisesReceived = [];
 	}
 }
