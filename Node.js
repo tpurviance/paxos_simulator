@@ -155,7 +155,7 @@ Node.prototype.receiveMessage = function(message) {
 					// Quorum of accepts
 					Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
 					this.clResSent = true;
-					this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);		
+					this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);
 				}
 			}
 			break;

@@ -15,7 +15,7 @@ Paxos.getInstance = function() {
  * Actually start
  */ 
 Paxos.prototype.go = function() {
-	this.paused = false;
+	this.paused = true;
 	this.ui = {};
 	this.ui.numnodes = {};
 	this.ui.numnodes.input = document.getElementById('numnodes');
@@ -52,9 +52,10 @@ Paxos.prototype.go = function() {
 }
 
 Paxos.prototype.submitUpdate = function(value) {
+	NodeMgr.getInstance().resetNodeState();
 	var leader = NodeMgr.getInstance().leaderNode;
 	var cli = NodeMgr.getInstance().clientNode;
-	Logger.getInstance().log('Sending SYSREQUEST to Node #' + leader.id + ' with data e0ad33b7', 1);
+	Logger.getInstance().log('Sending SYSREQUEST to Node #' + leader.id + ' with data ' + value, 1);
 	cli.sendMessage(leader, Message.Type['SYSREQUEST'], { 'data': value });
 }
 
@@ -87,8 +88,11 @@ Paxos.prototype.reboot = function() {
 Paxos.prototype.pause = function() {
 	var inst = Paxos.getInstance();
 	if (inst.paused) {
+		if (inst.ui.pause.value == 'Begin Simulation')
+			Logger.getInstance().log('Simulation started - beginning leader election now');
+		else
+			Logger.getInstance().log('Simulation unpaused');
 		inst.ui.pause.value = 'Pause Simulation';
-		Logger.getInstance().log('Simulation unpaused');
 	} else {
 		inst.ui.pause.value = 'Unpause Simulation';
 		Logger.getInstance().log('Simulation paused');
