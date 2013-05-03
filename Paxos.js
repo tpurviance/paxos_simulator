@@ -43,8 +43,10 @@ Paxos.prototype.go = function() {
 		new Node(x, y, null, null, ["proposer","acceptor","learner"]);
 	}
 	
-	var n1 = NodeMgr.getInstance().nodess[0];
-	n1.setLeader();
+	//var n1 = NodeMgr.getInstance().nodess[0];
+	//n1.setLeader();
+	
+	NodeMgr.getInstance().sendBroadcasts();
 	
 	//this.submitUpdate('e0ad33b7');
 

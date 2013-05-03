@@ -7,6 +7,7 @@ var NodeMgr = function() {
 	this.clientNode = {};
 	this.leaderNode = null;
 	this.nodeFlavors = new Array();
+	this.leader = -1;
 }
 NodeMgr.instance = null;
 NodeMgr.getInstance = function() {
@@ -49,6 +50,15 @@ NodeMgr.prototype.drawNodes = function (context) {
 	// draw paxos nodes	
 	for(var i = 0; i < this.nodess.length; i++) {
 		this.nodess[i].draw(context);
+	}
+}
+
+NodeMgr.prototype.sendBroadcasts = function() {
+	for(var i = 0; i < this.nodess.length; i++) {
+		for (var j = 0; j < this.nodess.length; j++) {
+			this.nodess[i].broadcastsReceived.push(-1);
+		}
+		this.nodess[i].selfBroadcast();
 	}
 }
 

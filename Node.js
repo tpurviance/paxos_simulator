@@ -27,13 +27,18 @@ var Node = function(x, y, type, id, flavors) {
 	this.acReqSent = false;
 	this.clResSent = false;
 	
+	// Election fields
+	this.sbReceived = 0;
+	this.highIdSeen = -1;
+	this.electionPhase = 0;
+	this.broadcastsReceived = [];
+	this.lpromisesReceived = [];
+	
 	if(flavors.indexOf("client") != -1) {
 		this.drawable.color = "DarkRed";
 		NodeMgr.getInstance().clientNode = this;
 	} else {
 		NodeMgr.getInstance().addNode(this, flavors);
-		
-		// TODO Send ID broadcast to all other nodes
 	}
 }
 Node.NextId = 0;
@@ -63,6 +68,11 @@ Node.prototype.setLeader = function() {
 	this.isLeader = true;
 	NodeMgr.getInstance().leaderNode = this;
 	this.drawable.color = "ForestGreen";
+}
+
+Node.prototype.selfBroadcast = function() {
+	var msg = { 'selfID': this.id };
+	this.sendSharepoint(Message.Type.SELFBROADCAST, msg);
 }
 
 Node.prototype.receiveMessage = function(message) {
@@ -172,16 +182,52 @@ Node.prototype.receiveMessage = function(message) {
 		case Message.Type['SELFBROADCAST']:
 			// Add to tally
 			// If tally is > n/2 and still in first phase, send out HIGHBROADCAST using the highest ID seen and move to 2nd phase
+			if (this.electionPhase >= 3)
+				break;			
+			if (message.content.selfID > this.highIdSeen)
+				this.highIdSeen = message.content.selfID;
+			this.sbReceived++;
+			if (this.sbReceived > NodeMgr.getInstance().getAllNodes().length / 2) {
+				var msg = { 'selfID': this.id, 'highID': this.highIdSeen };
+				this.sendSharepoint(Message.Type.HIGHBROADCAST, msg);
+			}
+			this.electionPhase = 2;
 			break;
 		case Message.Type['HIGHBROADCAST']:
 			// Add to list of (ID, HID)
 			// Update highest ID if needed
 			// If > n/2 responses and still in 2nd phase, send out HIGHPROMISE using new HID and move to 3rd phase
 			// (What if HID is not agreed upon by the majority?)
+			if (this.electionPhase >= 3)
+				break;
+			var from = message.content.selfID;
+			var high = message.content.highID;
+			this.broadcastsReceived[from] = high;
+			var agr = commonValue(this.broadcastsReceived);
+			if (agr && agr >= 0) {
+				Logger.getInstance().log('Node ' + this.id + ' has received HIGHBROADCASTS from a majority of nodes vouching for ' + agr);
+				this.sendSharepoint(Message.Type.HIGHPROMISE, { 'selfID' : this.id, 'highID': agr});
+				this.electionPhase = 3;
+			}
 			break;
 		case Message.Type['HIGHPROMISE']:
 			// Add to list of (ID, HID) promises
 			// if > n/2 have promised to the same HID, set HID as elected leader and if self is not HID, remove 'proposer' from self's flavors.
+			if (this.electionPhase >= 4)
+				break;
+			var from = message.content.selfID;
+			var high = message.content.highID;
+			this.lpromisesReceived[from] = high;
+			var agr = commonValue(this.lpromisesReceived);
+			if (agr && agr >= 0) {
+				Logger.getInstance().log('Node ' + this.id + ' has received HIGHPROMISES from a majority of nodes vouching for ' + agr, 1);
+				NodeMgr.getInstance().leader = agr;
+				if (agr != this.id)
+					this.flavors = removeA(this.flavors, 'proposer');
+				else
+					this.setLeader();
+				this.electionPhase = 4;
+			}
 			break;
 		default:
 			Logger.getInstance().log('ERROR: Unknown message type received...');
@@ -199,6 +245,16 @@ Node.prototype.receiveMessage = function(message) {
 	this.sendMessage(randRecip1, message.type, message.content);
 	this.sendMessage(randRecip2, message.type, message.content);
 */
+}
+
+Node.prototype.sendSharepoint = function(type, content) {
+	var allNodes = NodeMgr.getInstance().getAllNodes();
+	for (var i = 0, len = allNodes.length; i < len; i++) {
+		var node = allNodes[i];
+		if (node.id != this.id) {
+			this.sendMessage(node, type, content);
+		}
+	}
 }
 
 Node.prototype.sendMessage = function(to, type, content) {

@@ -38,3 +38,34 @@ var dumbStringify = function(dict) {
 	s += '}';
 	return s;
 }
+
+/** Read an array and see if a common value exists */
+var commonValue = function(arr) {
+	var thresh = .6;
+	var n = -1;
+	var vals = {};
+	for (var i = 0; i < arr.length; i++) {
+		var val = arr[i];
+		if (!vals[val]) vals[val] = 0;
+		vals[val]++;
+		n++;
+	}
+	for (var key in vals) {
+		if (n == 0 || vals[key] / n > thresh)
+			return key;
+	}
+	return null;
+}
+
+/** Remove all matching values from an array */
+// http://stackoverflow.com/questions/3954438/remove-item-from-array-by-value
+var removeA = function(arr) {
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+        what = a[--L];
+        while ((ax= arr.indexOf(what)) !== -1) {
+            arr.splice(ax, 1);
+        }
+    }
+    return arr;
+}

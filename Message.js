@@ -3,7 +3,7 @@
  * From and To should be IDs (Node.id property)
  * Type should be from the Message.Type enum
  * Content should be a JSON serialization of any necessary information
- * 	FIELDS TO USE FOR SERIALIZATION: data, proposalNumber
+ * 	FIELDS TO USE FOR SERIALIZATION: data, proposalNumber, selfID, highID
  */
 var Message = function(from, to, type, content) {
 	this.from = from;
@@ -30,6 +30,15 @@ var Message = function(from, to, type, content) {
 			break;
 		case Message.Type['SYSRESPONSE']:
 			color = "LightGreen";
+			break;
+		case Message.Type['SELFBROADCAST']:
+			color = "Magenta";
+			break;
+		case Message.Type['HIGHBROADCAST']:
+			color = "Orange";
+			break;
+		case Message.Type['HIGHPROMISE']:
+			color = "SlateBlue";
 			break;
 		default:
 			color = "rgb(200, 200, 200)";
