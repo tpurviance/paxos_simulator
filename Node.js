@@ -286,8 +286,11 @@ Node.prototype.receiveMessage = function(message) {
 				//if (agr != this.id)
 				//	this.flavors = removeA(this.flavors, 'proposer');
 				//else
-				if(agr == this.id)
+				if(agr == this.id){
 					this.setLeader();
+				} else {
+					this.definitelyAintLeader()
+				}
 				this.electionPhase = 4;
 			}
 			break;
@@ -355,4 +358,9 @@ Node.prototype.switchRogue = function() {
 
 Node.prototype.containsPoint = function(x, y) {
 	return (Math.abs(x - this.x) < constants.nodeSize && Math.abs(y - this.y) < constants.nodeSize)
+}
+
+Node.prototype.definitelyAintLeader = function() {
+	this.drawable.color = "Navy";
+	this.isLeader = false;
 }
