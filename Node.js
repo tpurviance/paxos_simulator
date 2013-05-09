@@ -353,6 +353,23 @@ Node.prototype.switchRogue = function() {
 		this.drawable.color = "darkGrey";
 	} else {
 		this.drawable.color = this.oldDrawableColor;
+		for (var i = 0; i < NodeMgr.getInstance().getAllNodes().length; i++)
+			NodeMgr.getInstance().getAllNodes()[i].informNodeBackUp(this);
+		
+	}
+}
+
+Node.prototype.informNodeBackUp = function(upNode) {
+	if (this.isLeader && !!(this.proposedData) ) {
+		if (this.isSteadyStating || this.promisesReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2 ){
+			this.sendMessage(upNode, Message.Type['ACCEPT_REQUEST'], {data:this.proposedData, 
+				proposalNumber:this.highestProposal, 
+				instanceNumber:this.currentInstance});
+		} else {
+			this.sendMessage(upNode, Message.Type['PREPARE'], {data:this.proposedData, 
+				proposalNumber:this.highestProposal, 
+				instanceNumber:this.currentInstance});
+		}
 	}
 }
 
