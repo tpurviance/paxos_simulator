@@ -55,6 +55,7 @@ NodeMgr.prototype.drawNodes = function (context) {
 
 NodeMgr.prototype.sendBroadcasts = function() {
 	for(var i = 0; i < this.nodess.length; i++) {
+		this.nodess[i].broadcastsReceived = [];
 		for (var j = 0; j < this.nodess.length; j++) {
 			this.nodess[i].broadcastsReceived.push(-1);
 		}

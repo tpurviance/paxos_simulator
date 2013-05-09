@@ -41,7 +41,7 @@ var dumbStringify = function(dict) {
 
 /** Read an array and see if a common value exists */
 var commonValue = function(arr) {
-	var thresh = .6;
+	var thresh = .500000001;
 	var n = -1;
 	var vals = {};
 	for (var i = 0; i < arr.length; i++) {

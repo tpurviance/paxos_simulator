@@ -50,7 +50,7 @@ Paxos.prototype.go = function() {
 	
 	//this.submitUpdate('e0ad33b7');
 
-	this.timeoutInterval = window.setInterval(this.animateLoop, 10);
+	this.timeoutInterval = window.setInterval(this.animateLoop, 3);
 }
 
 Paxos.prototype.submitUpdate = function(value) {
@@ -114,7 +114,7 @@ Paxos.prototype.animateLoop = function() {
 		CanvasMgr.getInstance().drawCanvas();
 		//var timeleft = (inst.waitTime - (Date.now() - timestart)) || 0;
 		//timeleft = Math.max(7,timeleft);
-		var timeleft = 1000 / 60;
+		//var timeleft = 1000 / 6000;
 		CanvasMgr.getInstance().frameTime = (timestart - CanvasMgr.getInstance().lastFrame) || 1 ;
 		CanvasMgr.getInstance().lastFrame = timestart;
 	}

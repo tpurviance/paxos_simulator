@@ -204,25 +204,30 @@ Node.prototype.receiveMessage = function(message) {
 			// if leader, accumulate response
 			// if learner, accumulate responses. if a majority has been reached, make the value permanent and send SYSRESPONSE to client
 			if (this.isLeader) {
-				this.acceptsReceived.push(message.from)
-				if (!this.isDone && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
-					// Quorum of accepts
-					if (!this.clResSent) { 
-						Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
-						this.clResSent = true;
-						this.sendMessage(NodeMgr.getInstance().clientNode, Message.Type['SYSRESPONSE'], message.content);	
-						this.isDone = true;
+				if (message.content.proposalNumber == this.highestProposal && message.content.instanceNumber == this.currentInstance){
+					this.acceptsReceived.push(message.from)
+					if (!this.isDone && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+							// Quorum of accepts
+						if (!this.clResSent) { 
+							Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
+							this.clResSent = true;
+							this.sendMessage(NodeMgr.getInstance().clientNode, Message.Type['SYSRESPONSE'], message.content);	
+							this.isDone = true;
+						}
+						this.isSteadyStating = true;
 					}
-					this.isSteadyStating = true;
 				}
 			} else {
-				this.acceptsReceived.push(message.from);
-				if (!this.clResSent && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
-					// Quorum of accepts
-					if (!this.clResSent) { 
-						Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
-						this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);
-						this.clResSent = true;
+				if (message.content.proposalNumber >= this.highestProposal && message.content.instanceNumber >= this.highestInstance){
+					/// TODO: double check that it's accepting the right thing / counting the right thing
+					this.acceptsReceived.push(message.from);
+					if (!this.clResSent && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+						// Quorum of accepts
+						if (!this.clResSent) { 
+							Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
+							this.sendMessage(this, Message.Type['SYSRESPONSE'], message.content);
+							this.clResSent = true;
+						}
 					}
 				}
 			}
@@ -305,11 +310,13 @@ Node.prototype.receiveMessage = function(message) {
 }
 
 Node.prototype.sendSharepoint = function(type, content) {
-	var allNodes = NodeMgr.getInstance().getAllNodes();
-	for (var i = 0, len = allNodes.length; i < len; i++) {
-		var node = allNodes[i];
-		if (node.id != this.id) {
-			this.sendMessage(node, type, content);
+	if (!this.isRogue){
+		var allNodes = NodeMgr.getInstance().getAllNodes();
+		for (var i = 0, len = allNodes.length; i < len; i++) {
+			var node = allNodes[i];
+			if (node.id != this.id) {
+				this.sendMessage(node, type, content);
+			}	
 		}
 	}
 }
@@ -319,9 +326,26 @@ Node.prototype.sendMessage = function(to, type, content) {
 	message.send();
 }
 
+Node.prototype.initiateElection = function() {
+	if (!this.isRogue) {
+		this.sbReceived = 0;
+		this.highIdSeen = -1;
+		this.electionPhase = 0;
+		this.broadcastsReceived = [];
+		this.lpromisesReceived = [];
+		for (var j = 0; j < NodeMgr.getInstance().getAllNodes().length; j++) {
+			this.broadcastsReceived.push(-1);
+		}
+		this.selfBroadcast();	
+	}
+}
+
 Node.prototype.switchRogue = function() {
 	this.isRogue = !this.isRogue;
 	if (this.isRogue) {
+		if (NodeMgr.getInstance().leaderNode == this) {
+			NodeMgr.getInstance().sendBroadcasts();
+		}
 		this.oldDrawableColor = this.drawable.color;
 		this.drawable.color = "darkGrey";
 	} else {
