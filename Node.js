@@ -155,7 +155,7 @@ Node.prototype.receiveMessage = function(message) {
 							// TODO: this really shouldn't happen, so i don't know.
 						} else {
 						this.promisesReceived.push(message.from);
-						if (!this.isDone && this.promisesReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+						if (!this.isDone && this.promisesReceived.length >= NodeMgr.getInstance().quorum) {
 							// Quorum of promises
 							if (!this.acReqSent) { 
 								Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of promises.  Sending ACCEPT_REQUEST messages now...');
@@ -206,7 +206,7 @@ Node.prototype.receiveMessage = function(message) {
 			if (this.isLeader) {
 				if (message.content.proposalNumber == this.highestProposal && message.content.instanceNumber == this.currentInstance){
 					this.acceptsReceived.push(message.from)
-					if (!this.isDone && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+					if (!this.isDone && this.acceptsReceived.length >= NodeMgr.getInstance().quorum) {
 							// Quorum of accepts
 						if (!this.clResSent) { 
 							Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
@@ -221,7 +221,7 @@ Node.prototype.receiveMessage = function(message) {
 				if (message.content.proposalNumber >= this.highestProposal && message.content.instanceNumber >= this.highestInstance){
 					/// TODO: double check that it's accepting the right thing / counting the right thing
 					this.acceptsReceived.push(message.from);
-					if (!this.clResSent && this.acceptsReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2) {
+					if (!this.clResSent && this.acceptsReceived.length >= NodeMgr.getInstance().quorum) {
 						// Quorum of accepts
 						if (!this.clResSent) { 
 							Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of accepts.  Sending SYSRESPONSE messages now...');
@@ -248,7 +248,7 @@ Node.prototype.receiveMessage = function(message) {
 			if (message.content.selfID > this.highIdSeen)
 				this.highIdSeen = message.content.selfID;
 			this.sbReceived++;
-			if (this.sbReceived > NodeMgr.getInstance().getAllNodes().length / 2) {
+			if (this.sbReceived >= NodeMgr.getInstance().quorum) {
 				var msg = { 'selfID': this.id, 'highID': this.highIdSeen };
 				this.sendSharepoint(Message.Type.HIGHBROADCAST, msg);
 			}
@@ -361,7 +361,7 @@ Node.prototype.switchRogue = function() {
 
 Node.prototype.informNodeBackUp = function(upNode) {
 	if (this.isLeader && !!(this.proposedData) ) {
-		if (this.isSteadyStating || this.promisesReceived.length > NodeMgr.getInstance().getFlavoredNodes("acceptor").length / 2 ){
+		if (this.isSteadyStating || this.promisesReceived.length >= NodeMgr.getInstance().quorum ){
 			this.sendMessage(upNode, Message.Type['ACCEPT_REQUEST'], {data:this.proposedData, 
 				proposalNumber:this.highestProposal, 
 				instanceNumber:this.currentInstance});

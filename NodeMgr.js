@@ -4,6 +4,7 @@
 
 var NodeMgr = function() {
 	this.nodess = new Array();
+	this.quorum = 0;
 	this.clientNode = {};
 	this.leaderNode = null;
 	this.nodeFlavors = new Array();

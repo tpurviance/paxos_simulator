@@ -27,6 +27,9 @@ Paxos.prototype.go = function() {
 	this.ui.updateval.submit = document.getElementById('submit_update');
 	this.ui.updateval.submit.onclick = function(e) { Paxos.getInstance().submitUpdate(Paxos.getInstance().ui.updateval.input.value); };
 	
+	this.ui.quorumval = {};
+	this.ui.quorumval = document.getElementById('quorum_text');
+	
 	this.ui.pause = document.getElementById('pause');
 	this.ui.pause.onclick = this.pause;
 	
@@ -42,6 +45,8 @@ Paxos.prototype.go = function() {
 		var y  = constants.canvasMargin + 180 * Math.floor(i / npr);
 		new Node(x, y, null, null, ["proposer","acceptor","learner"]);
 	}
+	
+	NodeMgr.getInstance().quorum = this.ui.quorumval.value;
 	
 	//var n1 = NodeMgr.getInstance().nodess[0];
 	//n1.setLeader();

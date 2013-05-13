@@ -14,6 +14,7 @@
 		<script src="Functions.js"></script>
 		<script type="text/javascript">
 		window.onload = function() {
+			document.getElementById('quorum_text').value = Math.floor(document.getElementById('numnodes').value/2) + 1;
 			Paxos.getInstance().go();
 		}
 		
@@ -33,8 +34,9 @@
 	<body>
 		<div id="content">
 			<div id="ui">
-				<p>Number of nodes: <input type="text" id="numnodes" value="9" /><input type="submit" id="numnodes_update" value="Update" /></p>
+				<p>Number of nodes: <input type="text" id="numnodes" value="9" />Size of Quorum: <input type="text" id="quorum_text" /><input type="submit" id="numnodes_update" value="Update" /></p>
 				<br />
+				
 				<p><input type="submit" id="pause" value="Begin Simulation" /></p>
 				<br />
 				<p>Submit a value to the system: <input type="text" id="update_text" value="3" /><input type="submit" id="submit_update" value="Submit" /></p>
