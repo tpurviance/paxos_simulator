@@ -67,9 +67,10 @@ Node.prototype.draw = function (context) {
 		textLines = textLines.concat(["Proposed: " + (this.proposedData ? this.proposedData : null), 
 										"Promises: " + this.promisesReceived.length, 
 										"Accepts: " + this.acceptsReceived.length,
-										"Prop/Iter: " + this.highestProposal +"/" + this.currentInstance])
+										"Prop/Iter: " + this.highestProposal +"/" + this.currentInstance,
+										"Steady: " + (this.isSteadyStating ? "True" : "False")]);
 	} else if(this !== NodeMgr.getInstance().clientNode) {
-		textLines = textLines.concat(["Value: " + (this.acceptedMsg ? this.acceptedMsg.data : null), "Highest proposal: " + this.highestProposal]);
+		textLines = textLines.concat(["Value: " + (this.acceptedMsg ? this.acceptedMsg.data : null), "Highest proposal: " + this.highestSeen]);
 	}
 	
 	context.fillStyle = "MintCream";
@@ -81,6 +82,8 @@ Node.prototype.draw = function (context) {
 
 Node.prototype.setLeader = function() {
 	this.isLeader = true;
+	this.isSteadyStating = false;
+	this.highestProposal = this.highestSeen + 1;
 	NodeMgr.getInstance().leaderNode = this;
 	this.drawable.color = "ForestGreen";
 }
@@ -93,6 +96,10 @@ Node.prototype.selfBroadcast = function() {
 Node.prototype.receiveMessage = function(message) {
 	if(this.isRogue){
 		Logger.getInstance().log('Message not recieved: ' + message.toString(), -1);
+		if (NodeMgr.getInstance().LeaderNode == this && this.electionPhase == 4) {
+			Logger.getInstance().log('Leader faultered; rerunning elections.', 1);
+			NodeMgr.getInstance().sendBroadcasts();
+		}
 		return;
 	}
 
@@ -137,10 +144,12 @@ Node.prototype.receiveMessage = function(message) {
 			// if acceptor, send leader a promise to only accept proposals >= n. update highest value. else ignore (or send nonacknowledgement for optimization?
 			if (!this.highestSeen || this.highestSeen < message.content.proposalNumber) {
 				this.highestSeen = message.content.proposalNumber;
+				this.highestInstance = -1;
 				this.favoriteProposal = message.content;
 				this.sendMessage(message.from, Message.Type['PROMISE'], this.favoriteProposal);
 			} else {
 				//old prop / send nack
+				this.sendMessage(message.from, Message.Type['PROMISE'], this.favoriteProposal);
 			}
 			break;
 		case Message.Type['PROMISE']:
@@ -149,10 +158,14 @@ Node.prototype.receiveMessage = function(message) {
 				if (message.content.proposalNumber > this.highestProposal) {
 					// the acceptor sending this has seen a higher proposal number
 					this.highestCompetitorProp = message.content.proposalNumber;
+					this.highestProposal = this.highestCompetitorProp + randIntIn(1, 4);
+					this.sendMessage(message.from, Message.Type['PREPARE'], { 'data': this.proposedData, 'proposalNumber':this.highestProposal, 
+								'instanceNumber':this.currentInstance});
+					this.isSteadyStating = false;
 					// TODO: add code to handle dueling leaders.
-				} else if(message.content.proposalNumber == this.highestProposal) {
+				} else if(message.content.proposalNumber <= this.highestProposal) {
 						if (this.isSteadyStating) {
-							// TODO: this really shouldn't happen, so i don't know.
+							// TODO: this really shouldn't happen, so i don't know. maybe send an accept request?
 						} else {
 						this.promisesReceived.push(message.from);
 						if (!this.isDone && this.promisesReceived.length >= NodeMgr.getInstance().quorum) {
@@ -161,7 +174,7 @@ Node.prototype.receiveMessage = function(message) {
 								Logger.getInstance().log('Node ' + this.id + ' has achieved a quorum of promises.  Sending ACCEPT_REQUEST messages now...');
 								this.acReqSent = true;
 							}
-							var content = this.promiseMsg || {'data':this.proposedData, 'proposalNumber':++this.highestProposal, 'instanceNumber':this.currentInstance};
+							var content = this.promiseMsg || {'data':this.proposedData, 'proposalNumber':this.highestProposal, 'instanceNumber':this.currentInstance};
 							var acceptors = nm.getFlavoredNodes("acceptor");
 							for (var i = 0, len = acceptors.length; i < len; i++) {
 								var node = acceptors[i];
@@ -360,15 +373,17 @@ Node.prototype.switchRogue = function() {
 }
 
 Node.prototype.informNodeBackUp = function(upNode) {
-	if (this.isLeader && !!(this.proposedData) ) {
-		if (this.isSteadyStating || this.promisesReceived.length >= NodeMgr.getInstance().quorum ){
-			this.sendMessage(upNode, Message.Type['ACCEPT_REQUEST'], {data:this.proposedData, 
-				proposalNumber:this.highestProposal, 
-				instanceNumber:this.currentInstance});
-		} else {
-			this.sendMessage(upNode, Message.Type['PREPARE'], {data:this.proposedData, 
-				proposalNumber:this.highestProposal, 
-				instanceNumber:this.currentInstance});
+	if (!this.isRogue){
+		if (this.isLeader && !!(this.proposedData)) {
+			if (this.isSteadyStating || this.promisesReceived.length >= NodeMgr.getInstance().quorum ){
+				this.sendMessage(upNode, Message.Type['ACCEPT_REQUEST'], {data:this.proposedData, 
+					proposalNumber:this.highestProposal, 
+					instanceNumber:this.currentInstance});
+			} else {
+				this.sendMessage(upNode, Message.Type['PREPARE'], {data:this.proposedData, 
+					proposalNumber:this.highestProposal, 
+					instanceNumber:this.currentInstance});
+			}
 		}
 	}
 }

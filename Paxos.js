@@ -55,7 +55,7 @@ Paxos.prototype.go = function() {
 	
 	//this.submitUpdate('e0ad33b7');
 
-	this.timeoutInterval = window.setInterval(this.animateLoop, 3);
+	this.timeoutInterval = window.setInterval(this.animateLoop, 6);
 }
 
 Paxos.prototype.submitUpdate = function(value) {
